@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARTEX — 四つの役割</title>
+<style>
+  :root {
+    --paper: #f4f0e6;
+    --paper-2: #ebe4d4;
+    --ink: #1c1915;
+    --muted: #5e574c;
+    --line: #d5ccbc;
+    --line-strong: #1c1915;
+    --goals: #1a6244;
+    --goals-bg: #e4f1ea;
+    --planner: #8d3812;
+    --planner-bg: #f8ebe3;
+    --worker: #1a3d68;
+    --worker-bg: #e5eef7;
+    --main: #6a5218;
+    --main-bg: #f7f1dc;
+    --gate: #7c2430;
+    --gate-bg: #f8e7e9;
+    --graph: #2a2722;
+    --graph-bg: #e7e1d4;
+    --shadow: 0 1px 0 rgba(28, 25, 21, 0.04);
+    --serif: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", "WenQuanYi Micro Hei", serif;
+    --sans: "Yu Gothic UI", "Yu Gothic", "Meiryo", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans CJK JP", "Noto Sans JP", "WenQuanYi Micro Hei", "Droid Sans Fallback", sans-serif;
+    --mono: "Cascadia Mono", "Sarasa Mono J", "Yu Gothic UI", "WenQuanYi Micro Hei Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 500px at 10% -10%, #fffaf1 0%, transparent 55%),
+      var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  a { color: inherit; }
+  code, .mono { font-family: var(--mono); font-size: 0.86em; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 28px 80px; }
+
+  header.top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 22px;
+    margin-bottom: 28px;
+  }
+  .kicker {
+    margin: 0 0 8px;
+    letter-spacing: 0.16em;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .lede { margin: 12px 0 0; max-width: 46rem; color: var(--muted); }
+  nav.jump { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  nav.jump a {
+    text-decoration: none;
+    border: 1px solid var(--line);
+    background: #fffdf8;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 999px;
+  }
+  nav.jump a:hover { border-color: var(--ink); }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 28px;
+    margin: 0 0 8px;
+  }
+  .section-note { margin: 0 0 18px; color: var(--muted); max-width: 46rem; }
+  section { margin: 42px 0; }
+
+  /* ----- flow board ----- */
+  .board {
+    background: #fffdf8;
+    border: 1px solid var(--ink);
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+  .lane {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .lane + .lane { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+  .lane-name {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.18em;
+    font-size: 12px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .lane-body { min-width: 0; }
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .node {
+    background: #fff;
+    border: 1px solid var(--line-strong);
+    padding: 12px 14px;
+    min-width: 148px;
+    flex: 1 1 160px;
+    text-decoration: none;
+    display: block;
+  }
+  .node:hover { transform: translateY(-1px); }
+  .node strong { display: block; font-size: 16px; line-height: 1.3; }
+  .node span { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .node em { font-style: normal; font-size: 11px; letter-spacing: 0.08em; }
+  .node.goals { background: var(--goals-bg); }
+  .node.planner { background: var(--planner-bg); }
+  .node.worker { background: var(--worker-bg); }
+  .node.main { background: var(--main-bg); }
+  .node.gate { background: var(--gate-bg); }
+  .node.graph { background: var(--graph); color: #f6f1e6; flex: 1.4 1 240px; }
+  .node.graph span { color: #d9d0c2; }
+  .node.human { background: var(--paper-2); }
+
+  .arrow {
+    align-self: center;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+    text-align: center;
+    min-width: 72px;
+    flex: 0 0 auto;
+  }
+  .arrow b { display: block; font-size: 18px; color: var(--ink); font-weight: 500; line-height: 1; }
+
+  .outs {
+    display: grid;
+    gap: 6px;
+    flex: 1 1 180px;
+  }
+  .chip {
+    border: 1px solid var(--line-strong);
+    background: #fff;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+  .chip b { font-weight: 600; }
+
+  .loop {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 0.9fr) auto minmax(0, 1.2fr);
+    gap: 10px;
+    align-items: stretch;
+  }
+  .loop .wide { grid-column: 1 / -1; }
+  .span-note {
+    grid-column: 1 / 5;
+    margin: 0;
+    align-self: center;
+  }
+  .loop .gate { grid-column: 5 / -1; }
+  .vlabel, .span-note {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ----- prompt stack ----- */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 22px;
+    align-items: start;
+  }
+  .stack { display: flex; flex-direction: column; gap: 6px; }
+  .layer {
+    border: 1px solid var(--ink);
+    padding: 10px 12px;
+    background: #fffdf8;
+  }
+  .layer .tag {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .layer.fixed { background: var(--paper-2); }
+  .layer.db { background: #fff; }
+  .who { margin: 0; padding-left: 1.1em; }
+  .who li { margin: 6px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fffdf8;
+    font-size: 14px;
+  }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--paper-2); font-weight: 600; }
+  td.yes { background: #f3f7f2; }
+  td.no { color: #9a9186; }
+
+  /* ----- roles ----- */
+  .roles { display: grid; gap: 16px; }
+  article.role {
+    border: 1px solid var(--ink);
+    background: #fffdf8;
+    display: grid;
+    grid-template-columns: 220px 1fr 1fr;
+  }
+  article.role header {
+    padding: 16px;
+    border-right: 1px solid var(--line);
+  }
+  article.role h3 { margin: 6px 0 8px; font-family: var(--serif); font-weight: 500; font-size: 26px; }
+  article.role header p { margin: 0; color: var(--muted); font-size: 14px; }
+  .idx { font-size: 12px; letter-spacing: 0.14em; color: var(--muted); }
+  .col { padding: 16px 16px 8px; }
+  .col + .col { border-left: 1px solid var(--line); }
+  .col h4 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.12em; color: var(--muted); font-weight: 600; }
+  .col ol, .col ul { margin: 0; padding-left: 1.15em; }
+  .col li { margin: 0 0 8px; }
+  .tools {
+    grid-column: 2 / -1;
+    border-top: 1px solid var(--line);
+    padding: 10px 16px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .tools .label { font-size: 12px; letter-spacing: 0.1em; color: var(--muted); margin-right: 4px; }
+  .pill {
+    font-family: var(--mono);
+    font-size: 12px;
+    border: 1px solid var(--line);
+    padding: 2px 7px;
+    background: #fff;
+  }
+  article.role.goals header { background: var(--goals-bg); }
+  article.role.planner header { background: var(--planner-bg); }
+  article.role.worker header { background: var(--worker-bg); }
+  article.role.main header { background: var(--main-bg); }
+
+  .gates {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .gate-card {
+    border: 1px solid var(--ink);
+    padding: 14px 16px;
+    background: #fffdf8;
+    min-height: 160px;
+  }
+  .gate-card h3 { margin: 0 0 8px; font-family: var(--serif); font-weight: 500; font-size: 22px; }
+  .gate-card p { margin: 0; color: var(--muted); }
+  .gate-card.stop { background: var(--gate-bg); }
+
+  footer.note {
+    margin-top: 36px;
+    border-top: 1px solid var(--ink);
+    padding-top: 14px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 900px) {
+    header.top, .stack-grid, article.role, .gates, .loop { grid-template-columns: 1fr; }
+    article.role header, .col + .col { border: 0; border-bottom: 1px solid var(--line); }
+    .tools { grid-column: 1; }
+    .loop { grid-template-columns: 1fr; }
+    .loop .wide, .span-note, .loop .gate { grid-column: auto; }
+    .loop .arrow { text-align: left; }
+    nav.jump { justify-content: flex-start; }
+    .lane { grid-template-columns: 1fr; }
+    .lane-name { writing-mode: horizontal-tb; transform: none; letter-spacing: 0.12em; padding: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="kicker">ARTEX · agent/</p>
+      <h1>四つの役割</h1>
+      <p class="lede">goals が目標と範囲を切り出し、planner だけが次の一手を出し、worker は一つ実行して止まり、mainagent は人の窓口になる。下の図は、プロンプトがどう積まれ、処理がどこで止まるかを辿る。</p>
+    </div>
+    <nav class="jump">
+      <a href="#flow">流れ</a>
+      <a href="#prompt">プロンプトの層</a>
+      <a href="#roles">役割</a>
+      <a href="#gates">止まる場所</a>
+    </nav>
+  </header>
+
+  <section id="flow">
+    <h2>処理の流れ</h2>
+    <p class="section-note">タスクは一度 goals を通り、そのあと planner と worker の閉じたループに入る。人は mainagent から横入りする。ツールを止める承認は、チャットとは別の intercept である。</p>
+
+    <div class="board">
+      <div class="lane">
+        <div class="lane-name">起動 · 一度</div>
+        <div class="lane-body">
+          <div class="flow">
+            <div class="node human">
+              <em>入力</em>
+              <strong>タスク目標と説明</strong>
+              <span>人が書いた文だけが材料</span>
+            </div>
+            <div class="arrow"><b>→</b>一回だけ</div>
+            <a class="node goals" href="#goals">
+              <em>goals</em>
+              <strong>分解する</strong>
+              <span>手順は書かない。結果・境界・範囲</span>
+            </a>
+            <div class="arrow"><b>→</b>書き込み</div>
+            <div class="outs">
+              <div class="chip"><b>goal</b>　検証できる最終結果</div>
+              <div class="chip"><b>task scope</b>　明示されたホスト / IP だけ</div>
+              <div class="chip"><b>constraints</b>　allow / deny。無ければ空</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lane">
+        <div class="lane-name">自律ループ</div>
+        <div class="lane-body">
+          <div class="loop">
+            <a class="node graph wide" href="#graphs">
+              <em>デュアルグラフ</em>
+              <strong>探索グラフと資産グラフ</strong>
+              <span>探索（goal / intent / fact / finding）はこのタスクだけ。資産はタスク間で共有。変化と心拍が planner を起こし、prove と書き戻しがここへ戻る。</span>
+            </a>
+            <a class="node planner" href="#planner">
+              <em>01 planner · 唯一</em>
+              <strong>次の一手</strong>
+              <span>未カバーの方向があるときだけ intent。実行しない。直列の段は一歩だけ。</span>
+            </a>
+            <div class="arrow"><b>→</b>最大 4</div>
+            <div class="node">
+              <em>02 frontier</em>
+              <strong>待ち行列</strong>
+              <span>add_intent は一度に最大 4 件。open / running が空で未達なら、少なくとも 1 件。</span>
+            </div>
+            <div class="arrow"><b>→</b>1 件ずつ</div>
+            <a class="node worker" href="#worker">
+              <em>03 worker × N</em>
+              <strong>一つ受け取って止まる</strong>
+              <span>Bash と HTTP を実行し、資産・事実・検出を書いて戻る。</span>
+            </div>
+            <p class="span-note">TodoWrite は探索 ID で planner の目覚めをまたいで残る。worker のツールは intercept を毎回通る。</p>
+            <a class="node gate" href="#gates">
+              <em>毎回 · ツールの直前</em>
+              <strong>intercept</strong>
+              <span>allow はそのまま。deny は戻す。ask は人が許可するまで進まない。</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="lane">
+        <div class="lane-name">人の窓口</div>
+        <div class="lane-body">
+          <div class="flow">
+            <div class="node human">
+              <em>チャット</em>
+              <strong>人の一文</strong>
+              <span>方針の確認。自律ループは回さない</span>
+            </div>
+            <div class="arrow"><b>→</b>翻訳</div>
+            <a class="node main" href="#mainagent">
+              <em>mainagent</em>
+              <strong>観察して舵を切る</strong>
+              <span>ヒント、高優先の intent、目標、制約、走行中 work の補正</span>
+            </a>
+            <div class="arrow"><b>→</b>次の planner が読む</div>
+            <div class="node graph">
+              <em>グラフへ</em>
+              <strong>hint / intent / goal</strong>
+              <span>目標を足すと、完了済みタスクは running に戻る</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="prompt">
+    <h2>プロンプトの層</h2>
+    <p class="section-note">本文だけがデータベースで編集できる。末尾はコードが毎回足すので、本文を消しても落ちない。内部の推論文は中国語のまま残し、ユーザーに見える文だけを表示言語にする。</p>
+    <div class="stack-grid">
+      <div class="stack" aria-hidden="false">
+        <div class="layer db">
+          <div class="tag">段 A · 編集できる</div>
+          <strong>役割の本文</strong>
+          <div>初期値はコード。起動時に <code>agent_prompts</code> へ入る。UI の文があればそれを使う。テンプレートが壊れていたら初期文に戻る。</div>
+        </div>
+        <div class="layer fixed">
+          <div class="tag">段 B / C · 固定</div>
+          <strong>作業場所と流量</strong>
+          <div>中間ファイルの置き場。記録プロキシが有効な worker だけ、流量の再検索。</div>
+        </div>
+        <div class="layer fixed">
+          <div class="tag">条件つき · 固定</div>
+          <strong>操作制約</strong>
+          <div>goals が書いた allow / deny。planner と worker の末尾に足す。</div>
+        </div>
+        <div class="layer fixed">
+          <div class="tag">最後 · 固定</div>
+          <strong>表示言語</strong>
+          <div>事実の要約、検出の説明、チャット、状況要約。コマンドとログ原文は訳さない。</div>
+        </div>
+      </div>
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <th>足すもの</th>
+              <th>goals</th>
+              <th>planner</th>
+              <th>worker</th>
+              <th>mainagent</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>本文（段 A）</td>
+              <td class="yes">目標と制約の切り出し</td>
+              <td class="yes">状況判断と intent</td>
+              <td class="yes">受け取った一手だけ</td>
+              <td class="yes">人の文を操作に翻訳</td>
+            </tr>
+            <tr>
+              <td>範囲の末尾</td>
+              <td class="yes">資産ストアがあるとき</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>作業ディレクトリ</td>
+              <td class="no">—</td>
+              <td class="yes">tasks/&lt;id&gt;</td>
+              <td class="yes">tasks/&lt;id&gt;/i&lt;intent&gt;</td>
+              <td class="yes">tasks/&lt;id&gt;</td>
+            </tr>
+            <tr>
+              <td>流量ツールの説明</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+              <td class="yes">記録が有効なとき</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>操作制約</td>
+              <td class="no">書く側</td>
+              <td class="yes">読む</td>
+              <td class="yes">読む。最優先</td>
+              <td class="no">人が書き換える</td>
+            </tr>
+            <tr>
+              <td>intent 本文</td>
+              <td class="no">—</td>
+              <td class="no">ユーザー側に状況</td>
+              <td class="yes">システム側に固定</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>表示言語</td>
+              <td class="yes">最後</td>
+              <td class="yes">最後</td>
+              <td class="yes">最後</td>
+              <td class="yes">最後</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="section-note" style="margin-top:12px">変数は <code>{{.Goal}}</code> と <code>{{.Now}}</code> など。goals の説明文は変数に入れず、ユーザーメッセージへ置く。検出の流量ガイドは、ツール解決のあと、該当ツールがある役割にだけ足す。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="roles">
+    <h2>役割ごとの中身</h2>
+    <p class="section-note">左がプロンプトの義務、右がエンジン側の処理。ツール名は呼び出し口であり、手順そのものではない。</p>
+    <div class="roles">
+
+      <article class="role goals" id="goals">
+        <header>
+          <div class="idx">01 · 一度</div>
+          <h3>goals</h3>
+          <p>探索ループには入らない。セッションは <span class="mono">exp{id}-goals</span>。</p>
+        </header>
+        <div class="col">
+          <h4>プロンプト</h4>
+          <ol>
+            <li>書いてある操作の境界を <span class="mono">set_constraints</span> へ。指示語は具体的なホストやポートに置き換える。無ければ呼ばない。</li>
+            <li>明示された範囲だけを <span class="mono">add_task_scope</span> へ。ホスト名は完全なサブドメイン。裸のルートか「全体」とあるときだけルートドメイン。</li>
+            <li>検証できる最終結果だけを <span class="mono">set_goals</span> へ。偵察や手順は子目標にしない。</li>
+          </ol>
+        </div>
+        <div class="col">
+          <h4>処理</h4>
+          <ol>
+            <li>タスク開始時に一度。最大 8 ターン。権限は bypass。</li>
+            <li>ツールは制約、範囲、目標の三つまで。範囲ツールは資産ストアとタスク ID があるときだけ付く。</li>
+            <li>目標ノードはツールが探索グラフへ直接書く。何も残らなければ、目標の原文を一つ残す。</li>
+            <li>活動ログ上の名前は画面用に planner と付く。</li>
+          </ol>
+        </div>
+        <div class="tools">
+          <span class="label">ツール</span>
+          <span class="pill">set_constraints</span>
+          <span class="pill">add_task_scope</span>
+          <span class="pill">set_goals</span>
+        </div>
+      </article>
+
+      <article class="role planner" id="planner">
+        <header>
+          <div class="idx">02 · 起きるたび</div>
+          <h3>planner</h3>
+          <p>次の intent を出す人はここだけ。セッションは <span class="mono">exp{id}-planner</span>。</p>
+        </header>
+        <div class="col">
+          <h4>プロンプト</h4>
+          <ol>
+            <li>ユーザーメッセージに、発火理由とグラフの要約 JSON が入っている。システム側は役割の本文だけ。</li>
+            <li>証拠が揃った goal を <span class="mono">prove_goal</span>。数値条件は実測と照合し、未達なら intent を足す。</li>
+            <li>open / running と重複するものは出さない。完了済みは、新しい材料が無い限り再発行しない。途中で切れたものはトレースを見て継続か再発行かを選ぶ。</li>
+            <li>依存する段は一歩だけ。独立した方向は並べてよい。出すときは <span class="mono">add_intent</span> を一度、最大 4 件。</li>
+            <li>未達で待ちも走行も無いときは、少なくとも 1 件。終局ラウンドは判定だけで、新しい intent は出さない。</li>
+          </ol>
+        </div>
+        <div class="col">
+          <h4>処理</h4>
+          <ol>
+            <li>グラフの変化をまとめてから、または心拍で <span class="mono">Plan</span>。</li>
+            <li>一時停止、削除、完了、収拾中、目標が無い状態では LLM を呼ばない。目標が無く待ち行列も空なら done。</li>
+            <li>Todo は探索 ID で目覚めをまたいで残る。このチャットの外にある。</li>
+            <li>全 goal が met になると、走行中の worker を止め、タスクを done にする。</li>
+            <li>Bash と WebFetch は記録プロキシ経由。Web 検索は既定でオフ。</li>
+          </ol>
+        </div>
+        <div class="tools">
+          <span class="label">主なツール</span>
+          <span class="pill">graph_overview</span>
+          <span class="pill">list_facts</span>
+          <span class="pill">list_findings</span>
+          <span class="pill">node_detail</span>
+          <span class="pill">list_assets</span>
+          <span class="pill">list_untested_assets</span>
+          <span class="pill">add_intent</span>
+          <span class="pill">prove_goal</span>
+          <span class="pill">steer_work</span>
+          <span class="pill">kill_work</span>
+          <span class="pill">get_worker_trace</span>
+        </div>
+      </article>
+
+      <article class="role worker" id="worker">
+        <header>
+          <div class="idx">03 · 並列</div>
+          <h3>worker</h3>
+          <p>intent を一つ claim し、書いて、止まる。プールの数だけ同時に走る。</p>
+        </header>
+        <div class="col">
+          <h4>プロンプト</h4>
+          <ol>
+            <li>領分は受け取った一文だけ。別方向の手がかりは事実の要約に一行残し、自分では追わない。</li>
+            <li>資産そのものは <span class="mono">insert_assets</span>。観察は <span class="mono">record_fact</span>。今回再現できたものだけ <span class="mono">report_finding</span>。</li>
+            <li>操作制約は、intent より上。反するコマンドは出さない。</li>
+            <li>intent 本文と対象資産はシステムプロンプトに置き、圧縮で落ちないようにする。全体状況はユーザー側の読み取り専用。</li>
+          </ol>
+        </div>
+        <div class="col">
+          <h4>処理</h4>
+          <ol>
+            <li>frontier から一つ取り、<span class="mono">Execute</span>。作業場所はその intent 専用。</li>
+            <li>すべてのツール呼び出しは Guard を通る。補正文は次のツールの前に入る。</li>
+            <li>検出を書いた瞬間に planner を起こす。終了を待たない。</li>
+            <li>終わりは、自ら止まる、歩数、時間、kill、一時停止、目標達成。上限時は書き残しだけを収拾する。</li>
+            <li>同じ intent の再実行は会話の続きから。モデルエラーだけ、エンジンが回数を決めてやり直す。</li>
+          </ol>
+        </div>
+        <div class="tools">
+          <span class="label">主なツール</span>
+          <span class="pill">Bash</span>
+          <span class="pill">WebFetch</span>
+          <span class="pill">record_fact</span>
+          <span class="pill">report_finding</span>
+          <span class="pill">insert_assets</span>
+          <span class="pill">list_assets</span>
+          <span class="pill">list_findings</span>
+          <span class="pill">node_detail</span>
+          <span class="pill">traffic_search</span>
+        </div>
+      </article>
+
+      <article class="role main" id="mainagent">
+        <header>
+          <div class="idx">04 · 人が話すたび</div>
+          <h3>mainagent</h3>
+          <p>自律ループは持たない。セッションは <span class="mono">exp{id}-main</span>。</p>
+        </header>
+        <div class="col">
+          <h4>プロンプト</h4>
+          <ol>
+            <li>進捗はグラフと worker 出力を読んで答える。ツールの戻り以外は言わない。</li>
+            <li>方向の変更は <span class="mono">add_hint</span>。今すぐ試す対象は高優先の <span class="mono">add_intent</span>。</li>
+            <li>走行中の補正は <span class="mono">steer_work</span>。目標の追加は <span class="mono">set_goals</span>。境界の変更は <span class="mono">set_constraints</span>。</li>
+            <li>すでに全目標が met で、新しい intent が新しい最終結果に見えるときは、登録するか人に確認する。</li>
+          </ol>
+        </div>
+        <div class="col">
+          <h4>処理</h4>
+          <ol>
+            <li>人のメッセージごとにセッションを作り、同じ会話記録を読み戻してから答える。</li>
+            <li>ヒントと新しい目標は planner を起こす。目標追加は、完了や一時停止のタスクを running に戻す。</li>
+            <li><span class="mono">steer_work</span> は走行中 worker の次のツール前に入る。<span class="mono">kill_work</span> と <span class="mono">prove_goal</span> は planner 側。</li>
+            <li>このチャットの Todo はターンが終わると捨てる。歩数上限では進捗を一文で終える。</li>
+          </ol>
+        </div>
+        <div class="tools">
+          <span class="label">主なツール</span>
+          <span class="pill">graph_overview</span>
+          <span class="pill">list_findings</span>
+          <span class="pill">list_facts</span>
+          <span class="pill">get_worker_output</span>
+          <span class="pill">add_hint</span>
+          <span class="pill">add_intent</span>
+          <span class="pill">steer_work</span>
+          <span class="pill">set_goals</span>
+          <span class="pill">set_constraints</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="graphs">
+    <h2>二つのグラフ</h2>
+    <div class="gates">
+      <div class="gate-card">
+        <h3>探索グラフ</h3>
+        <p>goal、intent、fact、finding、hint。タスクごとに分かれる。planner が読み、worker が fact と finding を足す。</p>
+      </div>
+      <div class="gate-card">
+        <h3>資産グラフ</h3>
+        <p>ドメイン、ホスト、IP、サービス、エンドポイント。タスク間で共有する。worker の <span class="mono">insert_assets</span> のあと、DNS と HTTP の補完が非同期で走る。</p>
+      </div>
+      <div class="gate-card">
+        <h3>範囲</h3>
+        <p>goals が登録した task scope が、そのタスクの分母になる。planner は未測の資産を見て、足りない方向だけ intent にする。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="gates">
+    <h2>止まる場所</h2>
+    <p class="section-note">人が手を出す経路は三つある。承認ダイアログは mainagent の中にはない。</p>
+    <div class="gates">
+      <div class="gate-card stop">
+        <h3>intercept</h3>
+        <p>ルールが ask のとき、そのツール呼び出しを保留する。人は許可または拒否する。deny はその場で戻る。worker の実行フックに付く。</p>
+      </div>
+      <div class="gate-card">
+        <h3>mainagent</h3>
+        <p>チャットで方針を変える。ヒント、intent、目標、制約、走行中の補正。ツールの実行そのものは止めない。</p>
+      </div>
+      <div class="gate-card">
+        <h3>planner の停止</h3>
+        <p><span class="mono">kill_work</span> は一つの work だけ止める。全 goal の達成、一時停止、削除、時間切れは、エンジンが走行中の実行を打ち切る。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="note">
+    このページは制御の流れです。役割のプロンプト本文（攻撃の進め方）は載せていません。本文は <span class="mono">agent/goals.go</span>、<span class="mono">planner.go</span>、<span class="mono">worker.go</span>、<span class="mono">mainagent.go</span> にあり、実行時は <span class="mono">agent/prompt.go</span> の <span class="mono">renderSystem</span> が組み立てます。
+  </footer>
+</div>
+</body>
+</html>
