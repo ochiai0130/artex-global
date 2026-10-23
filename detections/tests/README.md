@@ -1,48 +1,26 @@
-# ARTEX detection rule tests
+# ARTEX 検知ルールのテスト
 
-English · [한국어](README.ko.md)
+日本語 · [English](README.en.md) · [한국어](README.ko.md)
 
-> 한국어: 이 디렉터리는 [`../`](../)의 탐지 규칙이 실제로 발화하는지를 재현 가능하게 증명하는
-> 회귀 테스트입니다. 바이너리 캡처를 저장소에 넣지 않고, 패킷 캡처를 매번 결정론적으로 생성한 뒤
-> [Suricata](https://suricata.io)로 직접 돌려 경보 수를 확인합니다. 모든 테스트는 자신이 소유하거나
-> 서면 허가를 받은 시스템을 지키는 **방어·탐지 목적에만** 쓰십시오. 한국어 전체 문서는
-> **[README.ko.md](README.ko.md)** 를 보십시오.
+> このディレクトリは、[`../`](../) の検知ルールが実際に発火するかを、再現できる形で証明する回帰テストです。バイナリのキャプチャはリポジトリに置かず、パケットキャプチャを毎回決定的に生成したうえで [Suricata](https://suricata.io) に直接通し、アラート数を確認します。すべてのテストは、自分が所有するシステム、または書面による許可を得たシステムを守る **防御・検知の目的に限って** 使ってください。韓国語の全文は **[README.ko.md](README.ko.md)** を参照してください。
 
-Reproducible regression tests that prove the rules under [`../`](../) actually fire — and, just as
-important, stay silent on benign traffic. A detection rule you cannot run is a claim; these tests turn the
-claims in the rule files and the defense guide into something a reviewer can re-run from source.
+[`../`](../) にあるルールが実際に発火すること、そしてそれと同じくらい大切なこととして、良性のトラフィックでは沈黙することを、再現できる形で証明する回帰テストです。実行できない検知ルールは主張にすぎません。これらのテストは、ルールファイルと防御ガイドに書かれた主張を、レビュアーがソースから再実行できるものに変えます。
 
-No binary packet capture is committed. The capture is **synthesized deterministically on every run** and
-removed afterwards, so the test ships as readable source, not as an opaque fixture, and never bloats the
-repository.
+バイナリのパケットキャプチャはコミットしません。キャプチャは **実行のたびに決定的に合成** され、終わったあと削除されます。そのためテストは、不透明なフィクスチャではなく読めるソースとして配布され、リポジトリを肥大させません。
 
-## Run every suite at once — [`run-all.sh`](run-all.sh)
+## すべてのスイートを一度に実行する — [`run-all.sh`](run-all.sh)
 
-[`run-all.sh`](run-all.sh) runs all eight suites below in one command, in the same order as CI, so you do not
-have to invoke the eight `run.sh` scripts by hand. Each suite runs to completion even if an earlier one fails,
-the script prints a one-line PASS/FAIL summary per suite at the end, and it exits non-zero if any suite failed.
+[`run-all.sh`](run-all.sh) は、下の 8 つのスイートを CI と同じ順序で、1 つのコマンドにまとめて実行します。8 つの `run.sh` を手で呼び出さなくて済みます。前のスイートが失敗しても、各スイートは最後まで走ります。スクリプトは最後にスイートごとの PASS/FAIL を 1 行でまとめ、どれか失敗していれば 0 以外で終了します。
 
-Before the suites, it runs a harness self-check ([`check-harness-sync.sh`](check-harness-sync.sh)) that fails
-the run if this suite list, the per-suite steps in [CI](../../.github/workflows/detections.yml), and the suite
-directories on disk ever name different suites or a different order. That is the one gap the eight suites
-cannot see on their own: a suite wired into only one of the three (a new CI step with no `run-all.sh` entry, or
-a directory never added to either) would otherwise pass every per-suite test while a green local `run-all.sh`
-quietly stopped meaning a green CI. The check is a gate, not a ninth suite: it stays out of the summary
-below, so the eight detection suites stay eight.
+スイートの前に、ハーネスの自己点検（[`check-harness-sync.sh`](check-harness-sync.sh)）を実行します。このスイート一覧、[CI](../../.github/workflows/detections.yml) のスイートごとのステップ、ディスク上のスイートディレクトリの 3 つが、互いに違うスイートや違う順序を指していると、実行は失敗します。これは 8 つのスイート自身には見えない、唯一の隙間です。3 つのうち 1 つにしか配線されていないスイート（`run-all.sh` の項目がない新しい CI ステップや、どちらにも追加されていないディレクトリ）は、スイートごとのテストはすべて通りながら、ローカルで green の `run-all.sh` が、green な CI を意味しなくなっていることに気づきにくくなります。この点検は 9 つ目のスイートではなくゲートです。下の要約には出ないので、検知スイートは 8 つのままです。
 
-Two more gates run the same way — before the suite loop, out of the summary, and never counted as suites:
-the [host-triage tool](../triage/)'s `--self-test` ([`triage-selftest.sh`](triage-selftest.sh)) and the
-defense-template consistency check ([`check-defense-template.sh`](check-defense-template.sh)). The latter
-re-runs the facts the defense guide states about its inline Sigma correlation template (`sigma check`
-passes, it converts on splunk/eql/loki, lucene and kusto reject the correlation, and the Korean and English
-copies carry a byte-identical rule body); that template is prose outside the [`../sigma/`](../sigma/) rule
-tree, so no suite would otherwise catch it going stale against an upstream sigma-cli.
+ゲートはもう 2 つ、同じやり方で動きます。スイートのループより前に実行し、要約には出さず、スイートとしては数えません。[ホストトリアージツール](../triage/) の `--self-test`（[`triage-selftest.sh`](triage-selftest.sh)）と、防御テンプレートの整合性チェック（[`check-defense-template.sh`](check-defense-template.sh)）です。後者は、防御ガイドがインラインの Sigma 相関テンプレートについて述べている事実（`sigma check` が通ること、splunk / eql / loki で変換できること、lucene と kusto は相関を拒むこと、韓国語版と英語版のルール本文がバイト単位で同一であること）を、もう一度実行します。そのテンプレートは [`../sigma/`](../sigma/) のルールツリーの外にある本文なので、上流の sigma-cli が進んで主張が古くなっても、ほかのどのスイートも捕まえられません。
 
 ```sh
 detections/tests/run-all.sh
 ```
 
-Expected output (abridged):
+想定される出力（抜粋）:
 
 ```
 ===== detection suites summary =====
@@ -57,45 +35,29 @@ Expected output (abridged):
 RESULT: PASS
 ```
 
-Because it exits non-zero on any failure, it drops straight into a pre-commit hook. A ready-to-use example
-lives in [`.pre-commit-config.yaml`](../../.pre-commit-config.yaml) at the repository root: install it with
-`pip install pre-commit && pre-commit install`, and the runner then fires on commits that touch the detection
-rules or the upstream source files they pin — the same scope as CI. The image and version overrides the
-individual suites honour (`PYTHON_IMAGE`, `SIGMA_CLI_VERSION`, `SIGMAHQ_VALIDATORS_VERSION`, `SURICATA_IMAGE`)
-are inherited by the runner, so exporting any of them applies to every suite at once.
+どれか失敗すると 0 以外で終了するので、pre-commit フックにそのまま入れられます。すぐに使える例が、リポジトリ直下の [`.pre-commit-config.yaml`](../../.pre-commit-config.yaml) にあります。`pip install pre-commit && pre-commit install` で入れると、検知ルール、またはルールがピン留めしている上流のソースファイルに触れるコミットでランナーが発火します。範囲は CI と同じです。個々のスイートが受け取るイメージとバージョンの上書き（`PYTHON_IMAGE`、`SIGMA_CLI_VERSION`、`SIGMAHQ_VALIDATORS_VERSION`、`SURICATA_IMAGE`）はランナーに引き継がれるので、どれかを export すれば、すべてのスイートに一度に適用されます。
 
 ## Suricata — [`suricata/`](suricata/)
 
-[`suricata/run.sh`](suricata/run.sh) exercises the network rules in
-[`../suricata/artex.rules`](../suricata/artex.rules) end to end and asserts five properties:
+[`suricata/run.sh`](suricata/run.sh) は、[`../suricata/artex.rules`](../suricata/artex.rules) のネットワークルールを端から端まで動かし、5 つの性質を断言します。
 
-- **Valid** — the whole rules file loads under `suricata -T --init-errors-fatal`, so a rule that fails to
-  parse or initialise is caught even when no capture below exercises it. Plain `suricata -r` skips such a
-  rule and still exits 0, so this load check is the Suricata analogue of the Sigma suite's `sigma check`
-  validity assertion.
-- **Presence (enrich)** — sid `1000001` fires exactly once per enrichment probe.
-- **Velocity** — sid `1000002` fires once the `detection_filter` rate of 30 requests in 300 s per source is
-  crossed.
-- **Presence (WebFetch)** — sid `1000003` fires exactly once per norma WebFetch request, and the enrich sids
-  stay silent on that same capture — so the two network signatures are mutually specific, not just each
-  present.
-- **Specificity** — an identical capture whose only change is a benign browser User-Agent produces **zero**
-  ARTEX alerts.
+- **妥当** — ルールファイル全体が `suricata -T --init-errors-fatal` で読み込まれます。下のどのキャプチャもそのルールを通さなくても、解析や初期化に失敗したルールはここで捕まります。素の `suricata -r` はそのようなルールを飛ばしても終了コード 0 のままなので、この読み込み検査は、Sigma スイートの `sigma check` による妥当性の断言に相当する、Suricata 側の仕組みです。
+- **存在（enrich）** — sid `1000001` は、エンリッチのプローブごとにちょうど 1 回発火します。
+- **速度** — ソースごとに 300 秒あたり 30 リクエストという `detection_filter` のレートを超えると、sid `1000002` が発火します。
+- **存在（WebFetch）** — sid `1000003` は、norma の WebFetch リクエストごとにちょうど 1 回発火し、同じキャプチャでは enrich の sid は沈黙します。2 つのネットワークシグネチャは、それぞれ存在するだけでなく、互いに特異的です。
+- **特異性** — ほかは同一で、User-Agent だけを良性のブラウザに変えたキャプチャは、ARTEX のアラートを **1 件も** 出しません。
 
-[`suricata/gen_pcap.py`](suricata/gen_pcap.py) builds the capture with [scapy](https://scapy.net): N
-independent plaintext HTTP request/response flows from one fixed source, each carrying a chosen
-User-Agent, at a fixed base timestamp spaced one second apart. It only writes a file — it never sends a
-packet or touches a network.
+[`suricata/gen_pcap.py`](suricata/gen_pcap.py) は [scapy](https://scapy.net) でキャプチャを作ります。固定した 1 つの送信元から、N 本の独立した平文 HTTP リクエスト／レスポンスのフローを作り、それぞれに選んだ User-Agent を載せ、固定した基準タイムスタンプから 1 秒間隔で並べます。ファイルを書くだけで、パケットを送ることも、ネットワークに触れることもありません。
 
-### Run it
+### 実行する
 
-Needs only Docker; scapy and Suricata both run in containers.
+必要なのは Docker だけです。scapy と Suricata はどちらもコンテナで動きます。
 
 ```sh
 detections/tests/suricata/run.sh
 ```
 
-Expected output (abridged):
+想定される出力（抜粋）:
 
 ```
   PASS  ruleset loads with zero parse/init errors (suricata -T)
@@ -107,52 +69,33 @@ Expected output (abridged):
 RESULT: PASS
 ```
 
-The script exits non-zero if any assertion fails, so it drops straight into CI or a pre-commit hook.
-Override the images with `SURICATA_IMAGE` / `PYTHON_IMAGE` if you mirror them internally.
+どれかの断言が失敗するとスクリプトは 0 以外で終了するので、CI や pre-commit フックにそのまま入れられます。内部にミラーがある場合は、`SURICATA_IMAGE` / `PYTHON_IMAGE` でイメージを上書きできます。
 
-### Why the velocity count is a floor, not an exact match
+### 速度の件数を、一致値ではなく下限にする理由
 
-`run.sh` asserts the presence counts (`1000001 == 35`, `1000003 == 8`) and the benign count (`== 0`) exactly,
-because those are engine-version-independent: one alert per matching request, and no match on a different
-User-Agent. The
-velocity rule's count depends on how a given Suricata release resolves the `detection_filter` threshold at
-the boundary, so the test asserts `>= 1` and records the reference value separately. On **Suricata 8.0.7**
-the reference run produces **5** alerts on sid `1000002` (flows 31–35, after the 30-in-300 s threshold is
-crossed).
+`run.sh` は、存在の件数（`1000001 == 35`、`1000003 == 8`）と良性の件数（`== 0`）を正確に断言します。これらはエンジンのバージョンに依存しないからです。一致するリクエストごとにアラート 1 件、別の User-Agent では不一致です。速度ルールの件数は、その Suricata のリリースが境界で `detection_filter` の閾値をどう解決するかに依存するので、テストは `>= 1` を断言し、基準値は別に記録します。**Suricata 8.0.7** では、基準の実行が sid `1000002` に **5** 件のアラートを出します（300 秒に 30 件の閾値を超えたあとの、フロー 31–35）。
 
 ## Sigma — [`sigma/`](sigma/)
 
-[`sigma/run.sh`](sigma/run.sh) validates the Sigma rules under [`../sigma/`](../sigma/) structurally and by
-compilation with [sigma-cli](https://github.com/SigmaHQ/sigma-cli) (pySigma), and asserts five properties:
+[`sigma/run.sh`](sigma/run.sh) は、[`../sigma/`](../sigma/) の Sigma ルールを、構造と、[sigma-cli](https://github.com/SigmaHQ/sigma-cli)（pySigma）によるコンパイルの両方で検証し、5 つの性質を断言します。
 
-- **Valid** — `sigma check` reports 0 errors, 0 condition errors, and 0 issues over the whole tree.
-- **Compiles** — `sigma convert -t splunk` turns the whole tree into a backend query language without error.
-- **Indicators survive** — each atomic indicator string (`artex-enrich/1.0`, `artex-selfupdate`, the guard
-  marker, and the recording-proxy CA filename `mitmproxy-ca-cert.pem`) is still present in the compiled query,
-  so a rule cannot silently lose the string it is built on.
-- **Correlations compile** — the behaviour rules in [`../sigma/correlation/`](../sigma/correlation/) emit their
-  `event_count` / `value_count` aggregations rather than being dropped.
-- **Correlations are load-bearing** — converting one correlation rule *alone* fails, because it references its
-  atomic base rule by `id`; the reference is enforced, not decorative. This is the Sigma analogue of the
-  Suricata specificity assertion above.
+- **妥当** — `sigma check` がツリー全体で、エラー 0、条件エラー 0、issue 0 を報告します。
+- **コンパイルできる** — `sigma convert -t splunk` が、ツリー全体をエラーなくバックエンドのクエリ言語に変換します。
+- **指標が残る** — 各アトミック指標の文字列（`artex-enrich/1.0`、`artex-selfupdate`、ガードマーカー、記録用プロキシの CA ファイル名 `mitmproxy-ca-cert.pem`）が、コンパイルされたクエリに残ります。ルールが、自分の土台になっている文字列を静かに失うことはできません。
+- **相関がコンパイルできる** — [`../sigma/correlation/`](../sigma/correlation/) の振る舞いルールは、捨てられずに `event_count` / `value_count` の集約を出します。
+- **相関は実体として必要** — 相関ルールを *単独で* 変換すると失敗します。アトミックなベースルールを `id` で参照しており、その参照は飾りではなく強制されるためです。これは、上の Suricata の特異性の断言に相当する、Sigma 側の仕組みです。
 
-This is the structural + compilation validation documented in [`../README.md`](../README.md), made executable
-and assertive. The companion [`sigma_match/`](sigma_match/) suite below adds the *matching* half for both the
-atomic and the correlation rules — a representative malicious event (or timeline) fires each rule and a benign
-one does not — so the Sigma rules now get both a reproducible validation test and a reproducible matching test,
-the way the Suricata rule does. (The
-earlier concern that a weak hand-written matcher would undercut the rules is addressed by delegating all parsing
-to pySigma; see the trust model in the next section.)
+これは、[`../README.md`](../README.md) に書かれた構造とコンパイルの検証を、実行でき、断言する形にしたものです。対になる下の [`sigma_match/`](sigma_match/) スイートが、アトミックルールと相関ルールの両方に *マッチング* の半分を足します。代表的な悪意のあるイベント（またはタイムライン）が各ルールを発火させ、良性のものは発火させない、という確認です。これで Sigma ルールも、Suricata ルールと同じように、再現できる検証テストと再現できるマッチングテストの両方を持ちます。（弱い手書きのマッチャがルールを掘り崩す、という以前の懸念は、解析をすべて pySigma に委ねることで扱っています。信頼モデルは次の節で説明します。）
 
-### Run it
+### 実行する
 
-Needs only Docker; sigma-cli and the splunk backend run in a container and nothing is written to the repo.
+必要なのは Docker だけです。sigma-cli と splunk バックエンドはコンテナで動き、リポジトリには何も書き込みません。
 
 ```sh
 detections/tests/sigma/run.sh
 ```
 
-Expected output (abridged):
+想定される出力（抜粋）:
 
 ```
   PASS  sigma check: 0 errors, 0 condition errors, 0 issues
@@ -162,57 +105,30 @@ Expected output (abridged):
 RESULT: PASS
 ```
 
-The script exits non-zero if any assertion fails, so it drops straight into CI or a pre-commit hook. sigma-cli
-is pinned to a reference version (`3.1.0`); override it with `SIGMA_CLI_VERSION`, or the image with
-`PYTHON_IMAGE`, if you mirror them internally.
+どれかの断言が失敗するとスクリプトは 0 以外で終了するので、CI や pre-commit フックにそのまま入れられます。sigma-cli は基準バージョン（`3.1.0`）にピン留めしてあります。内部にミラーがある場合は、`SIGMA_CLI_VERSION` でバージョンを、`PYTHON_IMAGE` でイメージを上書きできます。
 
-## Sigma live event-matching — [`sigma_match/`](sigma_match/)
+## Sigma のライブなイベントマッチング — [`sigma_match/`](sigma_match/)
 
-[`sigma_match/run.sh`](sigma_match/run.sh) proves the Sigma rules under [`../sigma/`](../sigma/) — both the
-atomic rules and the correlation rules under [`../sigma/correlation/`](../sigma/correlation/) — actually *fire*
-on a matching event (or timeline) and stay quiet on a benign one — the "a detection you cannot run is only a
-claim" guarantee the Suricata suite gives the network rule, extended here to the host/log-layer rules. It
-asserts six properties, three for the atomic rules and three for the correlations:
+[`sigma_match/run.sh`](sigma_match/run.sh) は、[`../sigma/`](../sigma/) の Sigma ルール — アトミックルールと、[`../sigma/correlation/`](../sigma/correlation/) の相関ルールの両方 — が、一致するイベント（またはタイムライン）で実際に *発火* し、良性のものでは静かであることを証明します。Suricata スイートがネットワークルールに与える「実行できない検知は主張にすぎない」という保証を、ホスト／ログ層のルールへ広げたものです。アトミックルールに 3 つ、相関に 3 つ、合わせて 6 つの性質を断言します。
 
-- **Rule/sample pairing** — every atomic rule has an [`events/<name>.json`](sigma_match/events/) sample file and
-  every sample file maps back to a rule, so a rule added without samples fails here rather than going untested.
-- **True positives** — each rule matches every one of its malicious sample events.
-- **True negatives** — each rule matches none of its benign sample events. For example, a standalone
-  `mitmproxy-ca-cert.pem` under `.mitmproxy/` does **not** trip the recording-proxy rule, because its `|all`
-  modifier also requires the `_ca/` directory ARTEX writes — the matching test is what proves that discrimination.
-- **Correlation rule/timeline pairing** — every correlation rule has an
-  [`events/correlation/<name>.json`](sigma_match/events/correlation/) timeline file and every timeline maps back
-  to a rule. Each timeline event carries a `ts` field in relative seconds.
-- **Correlation true positives** — each rule fires on a positive timeline where the threshold is met inside the
-  window within one group. For example, requests from one source (`c-ip`) fanning out to 20 distinct hosts
-  within 10 minutes trip the enrichment fan-out rule.
-- **Correlation true negatives** — each rule stays quiet when the threshold is not met, when it is met but the
-  events are spread beyond the window, when they are split across groups, or when a temporal rule is missing a
-  leg. In particular a high-volume, low-breadth burst does **not** trip the fan-out rule: breadth, not volume, is
-  the signal, and the matching test is what proves that discrimination.
+- **ルールとサンプルの対応** — すべてのアトミックルールに [`events/<name>.json`](sigma_match/events/) のサンプルファイルがあり、すべてのサンプルファイルはルールへ戻ります。サンプルなしで追加されたルールは、未検証のまま通り過ぎず、ここで失敗します。
+- **真陽性** — 各ルールは、自分の悪意のあるサンプルイベントのすべてに一致します。
+- **真陰性** — 各ルールは、自分の良性サンプルイベントのどれにも一致しません。たとえば `.mitmproxy/` の下にある単独の `mitmproxy-ca-cert.pem` は、記録用プロキシのルールを発火させ**ません**。その `|all` 修飾子が、ARTEX が書く `_ca/` ディレクトリも要求するからです。その区別を証明するのがマッチングテストです。
+- **相関ルールとタイムラインの対応** — すべての相関ルールに [`events/correlation/<name>.json`](sigma_match/events/correlation/) のタイムラインファイルがあり、すべてのタイムラインはルールへ戻ります。各タイムラインのイベントは、相対秒の `ts` フィールドを持ちます。
+- **相関の真陽性** — 1 つのグループの中で、ウィンドウ内に閾値が満たされる陽性タイムラインに対して、各ルールが発火します。たとえば、1 つの送信元（`c-ip`）から 10 分以内に 20 の異なるホストへ扇状に広がるリクエストは、エンリッチのファンアウトルールを発火させます。
+- **相関の真陰性** — 閾値に届かないとき、閾値には届いてもイベントがウィンドウの外に散らばっているとき、グループをまたいで分かれているとき、あるいは時間的なルールの一方のレッグが欠けているときは、各ルールは沈黙します。とくに、量は多くても幅の狭いバーストはファンアウトルールを発火させ**ません**。信号は量ではなく幅であり、その区別を証明するのがマッチングテストです。
 
-The trust model is that pySigma — not hand-written code — parses each rule: an atomic rule into a condition tree
-(`|contains` → a wildcard value, `|all` → an AND, `1 of selection_*` → an OR), and a correlation rule into its
-aggregation spec (type, group-by, timespan, threshold, and the resolved references to the atomic base rules).
-[`check.py`](sigma_match/check.py) only walks that tree and spec, deciding which events feed a referenced rule
-with the very same atomic matcher, so the authoritative Sigma logic stays in pySigma; it raises rather than
-passing on any construct it does not explicitly support (fail-closed). Scope and limits are stated in the script
-header: the correlation window is the standard sliding-window interpretation (a `timespan`-second window
-anchored at each matching event) and a real SIEM's windowing may differ; matching is **case-insensitive** (the
-splunk-backend default the `sigma/` suite targets, which the destructive rule's own false-positive note
-assumes); and keyword matching is a full-text substring search. It is a regression test for the rules'
-field/value/condition/aggregation logic, not a substitute for validating in your own SIEM, whose field
-normalization may differ.
+信頼モデルは、手書きのコードではなく pySigma が各ルールを解析する、というものです。アトミックルールは条件木になり（`|contains` はワイルドカード値、`|all` は AND、`1 of selection_*` は OR）、相関ルールは集約の仕様（種別、group-by、timespan、閾値、そして解決済みのアトミックなベースルールへの参照）になります。[`check.py`](sigma_match/check.py) はその木と仕様をたどるだけで、参照されたルールにどのイベントを渡すかは、まったく同じアトミックマッチャで決めます。権威のある Sigma の論理は pySigma の側に残ります。明示的にサポートしていない構文に出会うと、通さずに例外を送出します（fail-closed）。範囲と限界はスクリプトのヘッダに書いてあります。相関のウィンドウは、標準的なスライディングウィンドウの解釈（マッチしたイベントごとに `timespan` 秒の窓を置く）であり、実際の SIEM のウィンドウの切り方は異なることがあります。マッチングは **大文字と小文字を区別しません**（`sigma/` スイートが対象にする splunk バックエンドの既定であり、破壊的コマンドのルール自身の誤検知の注記も、これを前提にしています）。キーワードのマッチングは、全文の部分文字列検索です。これはルールのフィールド、値、条件、集約の論理に対する回帰テストであり、フィールドの正規化が異なりうる、各自の SIEM での検証に代わるものではありません。
 
-### Run it
+### 実行する
 
-Needs only Docker; pySigma runs in a container and nothing is written to the repo.
+必要なのは Docker だけです。pySigma はコンテナで動き、リポジトリには何も書き込みません。
 
 ```sh
 detections/tests/sigma_match/run.sh
 ```
 
-Expected output (abridged):
+想定される出力（抜粋）:
 
 ```
   PASS  rule/sample pairing: 5 atomic rules, 5 event files, no orphans
@@ -224,39 +140,26 @@ Expected output (abridged):
 RESULT: PASS
 ```
 
-The script exits non-zero if any assertion fails, so it drops straight into CI or a pre-commit hook. pySigma is
-pinned to a reference version (`2.0.0`); override it with `PYSIGMA_VERSION`, or the image with `PYTHON_IMAGE`,
-if you mirror them internally.
+どれかの断言が失敗するとスクリプトは 0 以外で終了するので、CI や pre-commit フックにそのまま入れられます。pySigma は基準バージョン（`2.0.0`）にピン留めしてあります。内部にミラーがある場合は、`PYSIGMA_VERSION` でバージョンを、`PYTHON_IMAGE` でイメージを上書きできます。
 
-## Sigma backend portability — [`sigma_backends/`](sigma_backends/)
+## Sigma バックエンドの移植性 — [`sigma_backends/`](sigma_backends/)
 
-[`sigma_backends/run.sh`](sigma_backends/run.sh) proves the rules convert beyond the single Splunk example the
-Sigma test exercises, and keeps the per-backend support matrix in [`../README.md`](../README.md) honest. Sigma
-correlation conversion is backend-dependent, so the README tells a defender which `-t` targets take the whole
-tree and which take only the atomic rules — a claim that is only trustworthy if it is re-run. It asserts two
-properties, both positive so the test fails only on a real regression:
+[`sigma_backends/run.sh`](sigma_backends/run.sh) は、Sigma テストが動かしている単一の Splunk の例を超えてもルールが変換できることを証明し、[`../README.md`](../README.md) にあるバックエンドごとの対応表を正直に保ちます。Sigma の相関変換はバックエンドに依存するので、README は防御側に、どの `-t` 対象がツリー全体を受け、どの対象がアトミックルールだけを受けるかを伝えます。再実行して初めて信頼できる主張です。2 つの性質を断言します。どちらも肯定形なので、テストが失敗するのは実際の回帰があるときだけです。
 
-- **Correlations are portable** — the whole tree (atomic + correlation) converts on Splunk, the Elasticsearch
-  `eql` target, and Grafana `loki`, with the enrich indicator surviving into each query. This shows the
-  correlation rules are not Splunk-only.
-- **Atomic-only fallback works** — the five atomic rules still convert on `lucene` and the Microsoft `kusto`
-  backend, which do not support Sigma correlation conversion at the pinned versions, so a defender on those
-  backends can deploy the atomic rules and express the correlation window natively.
+- **相関は移植できる** — ツリー全体（アトミック + 相関）が Splunk、Elasticsearch の `eql` 対象、Grafana の `loki` で変換され、enrich の指標が各クエリに残ります。相関ルールが Splunk 専用ではないことを示します。
+- **アトミックだけのフォールバックが動く** — 5 つのアトミックルールは、`lucene` と Microsoft の `kusto` バックエンドでも変換されます。ピン留めしたバージョンでは、これらは Sigma の相関変換をサポートしないので、そのバックエンドを使う防御側はアトミックルールを配置し、相関ウィンドウはネイティブの機能で表現できます。
 
-It deliberately does not assert the negative "backend X cannot do correlations": that would turn a backend
-*improving* into a red build. The honest limitation lives in the README, reproduced by this test's commands.
-[`sigma_backends/check.sh`](sigma_backends/check.sh) is the in-container half; it installs the pinned sigma-cli
-plus four backends and reads the rule tree mounted read-only.
+「バックエンド X は相関を扱えない」という否定形は、わざと断言しません。そうすると、バックエンドが *良くなる* ことが赤いビルドになるからです。正直な限界は README にあり、このテストのコマンドがそれを再現します。[`sigma_backends/check.sh`](sigma_backends/check.sh) はコンテナの中の半分です。ピン留めした sigma-cli と 4 つのバックエンドをインストールし、読み取り専用でマウントしたルールツリーを読みます。
 
-### Run it
+### 実行する
 
-Needs only Docker; sigma-cli and the backends run in a container and nothing is written to the repo.
+必要なのは Docker だけです。sigma-cli とバックエンドはコンテナで動き、リポジトリには何も書き込みません。
 
 ```sh
 detections/tests/sigma_backends/run.sh
 ```
 
-Expected output (abridged):
+想定される出力（抜粋）:
 
 ```
   PASS  whole tree (atomic + correlation) converts on 'eql', enrich indicator survives
@@ -264,44 +167,26 @@ Expected output (abridged):
 RESULT: PASS
 ```
 
-The script exits non-zero if any assertion fails. sigma-cli is pinned (`3.1.0`, override with
-`SIGMA_CLI_VERSION`); the backend plugins install at their latest compatible version, so this suite is the one
-most sensitive to an upstream backend release — a plugin that drops support turns the build red, which is the
-signal to update the pin and the README matrix together.
+どれかの断言が失敗するとスクリプトは 0 以外で終了します。sigma-cli はピン留めしてあります（`3.1.0`、`SIGMA_CLI_VERSION` で上書き）。バックエンドのプラグインは、互換性のある最新版でインストールされます。そのためこのスイートは、上流のバックエンドのリリースに最も敏感です。サポートを落としたプラグインはビルドを赤くし、それが、ピンと README の表を一緒に更新する合図です。
 
-## SigmaHQ convention lint — [`sigma_lint/`](sigma_lint/)
+## SigmaHQ の規約リント — [`sigma_lint/`](sigma_lint/)
 
-[`sigma_lint/run.sh`](sigma_lint/run.sh) makes the "passes `sigma check` cleanly" promise in the README and
-`CONTRIBUTING.md` cover SigmaHQ's conventions, not just pySigma's core checks. Plain `sigma check` does not
-load the `pySigma-validators-sigmahq` plugin, so title casing, field-name taxonomy, logsource taxonomy, and
-reference-link conventions go unchecked. This suite installs that plugin and runs the full set against the
-documented baseline in [`sigma_lint/validators.yml`](sigma_lint/validators.yml). It asserts two properties:
+[`sigma_lint/run.sh`](sigma_lint/run.sh) は、README と `CONTRIBUTING.md` にある「`sigma check` をきれいに通る」という約束が、pySigma の中核の検査だけでなく、SigmaHQ の規約まで含むようにします。素の `sigma check` は `pySigma-validators-sigmahq` プラグインを読み込まないので、タイトルの大文字小文字、フィールド名の分類体系、ログソースの分類体系、参照リンクの規約は検査されずに通ります。このスイートはそのプラグインをインストールし、[`sigma_lint/validators.yml`](sigma_lint/validators.yml) に文書化したベースラインに対して一式を実行します。2 つの性質を断言します。
 
-- **The documented baseline is clean** — `sigma check` with `validators.yml` reports 0 errors and 0 issues.
-- **The full set is live, and only the documented exclusions remain** — running every SigmaHQ validator with
-  no exclusions still reports issues, and each one is among the four checks `validators.yml` deliberately
-  disables (nothing else). This is the anti-vacuity guard: if the plugin failed to load, the full run would
-  report nothing and the first property would pass for the wrong reason, so the known exclusions are required
-  to appear.
+- **文書化したベースラインはきれい** — `validators.yml` を付けた `sigma check` が、エラー 0、issue 0 を報告します。
+- **一式は生きていて、残るのは文書化した除外だけ** — 除外なしですべての SigmaHQ バリデータを実行しても issue が報告され、そのそれぞれは `validators.yml` がわざと無効にしている 4 つの検査のどれかです（それ以外はない）。これは空虚さを防ぐガードです。プラグインの読み込みに失敗すると、全体の実行は何も報告せず、最初の性質が間違った理由で通ってしまうので、既知の除外が現れることを要求します。
 
-The four exclusions encode SigmaHQ's monorepo filing scheme (logsource-prefixed and `correlation_` filenames)
-and taxonomy (a generic `application` logsource and a product-less `process_creation`), plus the
-branch-vs-permalink reference convention — none of which fit a small standalone rule set that references its
-own living docs. Each exclusion carries its rationale inline in `validators.yml`. Because every *other*
-SigmaHQ check is enforced, a rule that picks up a new convention issue — a mis-cased title, an off-taxonomy
-field name — turns the build red. `pySigma-validators-sigmahq` is pinned (`0.21.0`, override with
-`SIGMAHQ_VALIDATORS_VERSION`); bumping it may surface new conventions, which is the signal to update the rules
-or the documented baseline.
+4 つの除外は、SigmaHQ のモノレポの置き方（ログソースの接頭辞と `correlation_` のファイル名）と分類体系（汎用の `application` ログソースと、製品名のない `process_creation`）、そしてブランチ対パーマリンクの参照規約を表します。どれも、自分の生きている文書を参照する、小さく独立したルール集には合いません。各除外の理由は `validators.yml` の中に書いてあります。*それ以外* の SigmaHQ の検査はすべて強制されるので、新しい規約の issue を拾ったルール — 大文字小文字の崩れたタイトル、分類体系から外れたフィールド名 — はビルドを赤くします。`pySigma-validators-sigmahq` はピン留めしてあります（`0.21.0`、`SIGMAHQ_VALIDATORS_VERSION` で上書き）。バージョンを上げると新しい規約が現れることがあり、それが、ルールか文書化したベースラインを更新する合図です。
 
-### Run it
+### 実行する
 
-Needs only Docker; sigma-cli and the validator plugin run in a container and nothing is written to the repo.
+必要なのは Docker だけです。sigma-cli とバリデータのプラグインはコンテナで動き、リポジトリには何も書き込みません。
 
 ```sh
 detections/tests/sigma_lint/run.sh
 ```
 
-Expected output (abridged):
+想定される出力（抜粋）:
 
 ```
   PASS  sigma check with the documented baseline: 0 errors, 0 issues
@@ -309,34 +194,25 @@ Expected output (abridged):
 RESULT: PASS
 ```
 
-## ATT&CK layer — [`attack/`](attack/)
+## ATT&CK レイヤー — [`attack/`](attack/)
 
-[`attack/run.sh`](attack/run.sh) checks that the [ATT&CK coverage layer](../attack/) in
-[`../attack/artex_navigator_layer.json`](../attack/artex_navigator_layer.json) stays consistent with the
-rules it claims to cover. A coverage layer that drifts from its rule set is worse than none, so this turns
-"these rules cover these ATT&CK techniques" into something a reviewer can re-run from source. It asserts:
+[`attack/run.sh`](attack/run.sh) は、[`../attack/artex_navigator_layer.json`](../attack/artex_navigator_layer.json) の [ATT&CK カバレッジレイヤー](../attack/) が、カバーすると主張するルールと一致し続けることを確認します。ルール集からずれたカバレッジレイヤーは、レイヤーがない状態よりも害があります。このテストは、「これらのルールがこれらの ATT&CK テクニックをカバーする」を、レビュアーがソースから再実行できるものに変えます。断言するのは次のとおりです。
 
-- **Valid layer** — the file parses as JSON and carries the required ATT&CK Navigator v4.x fields, with a
-  well-formed technique ID and a valid ATT&CK tactic on every entry.
-- **Bidirectional match** — the scored techniques are *exactly* the `attack.*` technique tags on the Sigma
-  rules: no rule technique missing from the layer, no layer technique absent from the rules. The tactics
-  match the same way.
-- **Grounded** — every scored technique's comment names a rule file that exists, so the layer cannot cite a
-  rule that was renamed or removed.
+- **妥当なレイヤー** — ファイルは JSON として解析でき、必須の ATT&CK Navigator v4.x のフィールドを持ち、すべての項目に、形の正しいテクニック ID と有効な ATT&CK の戦術があります。
+- **双方向の一致** — スコアの付いたテクニックは、Sigma ルールの `attack.*` テクニックタグと *ちょうど* 一致します。レイヤーに欠けたルールのテクニックもなく、ルールにないレイヤーのテクニックもありません。戦術も同じやり方で一致します。
+- **根拠がある** — スコアの付いたすべてのテクニックのコメントが、実在するルールファイルを名指しするので、レイヤーは、名前が変わった、または削除されたルールを引用できません。
 
-This is a consistency check, not a firing test: it needs no detection backend, only the Python standard
-library, so unlike the Sigma and Suricata tests it carries no version-dependent counts. [`attack/check.py`](attack/check.py)
-is the in-container half; it reads the detections tree mounted read-only and writes nothing.
+これは発火テストではなく、一貫性の検査です。検知バックエンドは要らず、Python の標準ライブラリだけで動くので、Sigma と Suricata のテストと違い、バージョンに依存する件数はありません。[`attack/check.py`](attack/check.py) はコンテナの中の半分です。読み取り専用でマウントした検知ツリーを読み、何も書きません。
 
-### Run it
+### 実行する
 
-Needs only Docker; the check runs in a Python container and nothing is written to the repo.
+必要なのは Docker だけです。検査は Python コンテナで動き、リポジトリには何も書き込みません。
 
 ```sh
 detections/tests/attack/run.sh
 ```
 
-Expected output (abridged):
+想定される出力（抜粋）:
 
 ```
   PASS  scored techniques match the rule set exactly (8: T1059, T1105, T1485, T1489, T1557, T1561.002, T1592, T1595)
@@ -344,60 +220,29 @@ Expected output (abridged):
 RESULT: PASS
 ```
 
-The script exits non-zero if any assertion fails, so it drops straight into CI or a pre-commit hook.
-Override the image with `PYTHON_IMAGE` if you mirror it internally.
+どれかの断言が失敗するとスクリプトは 0 以外で終了するので、CI や pre-commit フックにそのまま入れられます。内部にミラーがある場合は、`PYTHON_IMAGE` でイメージを上書きできます。
 
-## Indicator source-of-truth — [`indicators/`](indicators/)
+## 指標の正本 — [`indicators/`](indicators/)
 
-[`indicators/run.sh`](indicators/run.sh) proves the one thing the three tests above do not: that each rule's
-pinned indicator is still the string ARTEX's own source actually emits. The Sigma test proves an indicator
-survives rule→query *compilation*; the ATT&CK test proves the layer matches the rules' tags; the Suricata
-test proves the network rule *fires* on a synthesized capture. None of them look back at the source file the
-indicator claims to come from. The rot they all miss is an upstream re-sync that bumps the prober User-Agent
-to `artex-enrich/2.0` or rewrites the guard marker: every rule still compiles, the layer still matches, the
-pcap test still fires — and the deployed rule silently stops matching real ARTEX traffic. It asserts, for
-each indicator, bidirectionally:
+[`indicators/run.sh`](indicators/run.sh) は、上の 3 つのテストが証明しない 1 つのことを証明します。各ルールがピン留めした指標が、いまも ARTEX 自身のソースが実際に出す文字列であることです。Sigma のテストは、指標がルールからクエリへの *コンパイル* を生き延びることを証明します。ATT&CK のテストは、レイヤーがルールのタグと一致することを証明します。Suricata のテストは、ネットワークルールが合成したキャプチャで *発火* することを証明します。どれも、指標が由来すると主張するソースファイルを振り返りません。それらがみな見逃す腐敗は、プローバの User-Agent を `artex-enrich/2.0` に上げる、またはガードマーカーを書き換える、上流の再同期です。それでもルールはすべてコンパイルでき、レイヤーは一致したままで、pcap のテストも発火します。そして、配置されたルールは、実際の ARTEX トラフィックへの一致を静かにやめます。各指標について、双方向に断言します。
 
-- **Source still emits it** — the value is present in the upstream source file(s) that produce it
-  (`artex-enrich/1.0` in `enrich/enrich.go`, `artex-selfupdate` in `selfupdate/`, the guard marker in
-  `guard/guard.go`). A missing value means an upstream change the rule has not caught up with.
-- **Rule still pins it** — the value is present in the rule built on it, so a rule edit cannot quietly move
-  the indicator away from its source. The Suricata rule is checked by its `startswith` prefix, matching how
-  it actually matches the wire.
-- **Deny-list correspondence** — the destructive-command tokens (`rm -rf`, `mkfs`, `DROP DATABASE`,
-  `FLUSHALL`) appear both in ARTEX's guard deny-list (`db/db.go`) and in the hunting rule that mirrors it.
-  These are generic hunting leads, not unique fingerprints, so the test asserts only the correspondence the
-  rule actually claims.
-- **Published list stays grounded** — the machine-readable indicator list
-  [`detections/indicators/artex_indicators.csv`](../indicators/artex_indicators.csv), the artifact a
-  defender imports, is re-read row by row: every value must still be present in the source file(s) it cites
-  and pinned in the rule(s) it cites, and every fingerprint the test grounds must appear in the list. So the
-  published CSV cannot silently drift from the source it claims to come from, in either direction.
-- **Both gates fire on each pinned source** — every upstream source the test reads is covered by the two
-  gates that run it: the CI workflow's `push` and `pull_request` paths filter
-  ([`.github/workflows/detections.yml`](../../.github/workflows/detections.yml)) and the local pre-commit
-  hook's `files` regex ([`.pre-commit-config.yaml`](../../.pre-commit-config.yaml)). The required set is
-  derived from the indicators themselves, so pinning a new source (as the `cmd/artex/main.go` ports once were)
-  without wiring it into *both* gates fails here — otherwise a change touching only that source skips the test
-  on whichever gate omits it: on CI it passes the merge gate green, on the hook it is never caught locally
-  even though the hook promises "the same source scope as CI".
+- **ソースがいまも出している** — 値が、それを生み出す上流のソースファイルにあること（`enrich/enrich.go` の `artex-enrich/1.0`、`selfupdate/` の `artex-selfupdate`、`guard/guard.go` のガードマーカー）。値がないことは、ルールがまだ追いついていない上流の変更を意味します。
+- **ルールがいまもピン留めしている** — 値が、それを土台にしたルールにあること。ルールの編集が、指標をソースから静かに引き離せないようにします。Suricata のルールは `startswith` のプレフィックスで確認します。ワイヤ上で実際に一致するやり方と同じです。
+- **拒否リストの対応** — 破壊的コマンドのトークン（`rm -rf`、`mkfs`、`DROP DATABASE`、`FLUSHALL`）が、ARTEX のガードの拒否リスト（`db/db.go`）と、それを映したハンティングルールの両方に現れること。これらは固有の指紋ではなく、一般的なハンティングの手がかりなので、テストが断言するのは、ルールが実際に主張する対応だけです。
+- **公開リストが根拠を保つ** — 防御側が取り込む成果物である、機械可読の指標リスト [`detections/indicators/artex_indicators.csv`](../indicators/artex_indicators.csv) を、行ごとに読み直します。すべての値は、引用するソースファイルにいまもあり、引用するルールにピン留めされていなければならず、テストが根拠を確認したすべての指紋は、このリストに現れなければなりません。公開された CSV は、由来すると主張するソースから、どちらの方向にも静かにずれることができません。
+- **両方のゲートが、ピン留めした各ソースで発火する** — テストが読むすべての上流ソースは、それを動かす 2 つのゲートに含まれます。CI ワークフローの `push` と `pull_request` の paths フィルタ（[`.github/workflows/detections.yml`](../../.github/workflows/detections.yml)）と、ローカルの pre-commit フックの `files` 正規表現（[`.pre-commit-config.yaml`](../../.pre-commit-config.yaml)）です。必要な集合は指標自身から導かれるので、新しいソースをピン留めしながら（以前の `cmd/artex/main.go` のポートがそうだったように）、*両方* のゲートへ配線しないと、ここで失敗します。そうしないと、そのソースだけに触れる変更は、そのソースを省いたゲートでテストを飛ばします。CI ではマージゲートを green のまま通過し、フックでは「CI と同じソース範囲」と約束しているのに、ローカルでは最後まで捕捉されません。
 
-This turns [`../README.md`](../README.md)'s promise — "every indicator here is grounded in a string verified
-in this repository's source, not inferred" — and CONTRIBUTING's first contribution contract into a guard a
-reviewer can re-run. Like the ATT&CK test it needs no detection backend, only the Python standard library;
-[`indicators/check.py`](indicators/check.py) reads the rule tree, the published indicator list, the pinned
-source packages, and the two gates that fire it (the CI workflow and the pre-commit config) mounted read-only
-and writes nothing.
+これは、[`../README.md`](../README.md) の約束 — 「ここにあるすべての指標は、推測ではなく、このリポジトリのソースで検証した文字列に根拠を置く」 — と、CONTRIBUTING の最初の貢献契約を、レビュアーが再実行できるガードに変えます。ATT&CK のテストと同じく、検知バックエンドは要らず、Python の標準ライブラリだけで動きます。[`indicators/check.py`](indicators/check.py) は、ルールツリー、公開された指標リスト、ピン留めしたソースパッケージ、そしてそれを発火させる 2 つのゲート（CI ワークフローと pre-commit の設定）を読み取り専用でマウントして読み、何も書きません。
 
-### Run it
+### 実行する
 
-Needs only Docker; the check runs in a Python container and nothing is written to the repo.
+必要なのは Docker だけです。検査は Python コンテナで動き、リポジトリには何も書き込みません。
 
 ```sh
 detections/tests/indicators/run.sh
 ```
 
-Expected output (abridged):
+想定される出力（抜粋）:
 
 ```
   PASS  enrichment prober User-Agent: 'artex-enrich/1.0' emitted by enrich/enrich.go
@@ -410,55 +255,31 @@ Expected output (abridged):
 RESULT: PASS
 ```
 
-The script exits non-zero if any assertion fails, so it drops straight into CI or a pre-commit hook.
-Override the image with `PYTHON_IMAGE` if you mirror it internally.
+どれかの断言が失敗するとスクリプトは 0 以外で終了するので、CI や pre-commit フックにそのまま入れられます。内部にミラーがある場合は、`PYTHON_IMAGE` でイメージを上書きできます。
 
-## MISP export consistency — [`misp/`](misp/)
+## MISP エクスポートの一貫性 — [`misp/`](misp/)
 
-[`misp/run.sh`](misp/run.sh) covers the second published form of the indicators — the ready-to-import MISP
-event [`detections/indicators/artex_indicators.misp.json`](../indicators/artex_indicators.misp.json). The
-indicator test above keeps the CSV grounded in the source; this test keeps the MISP event, the artifact a
-defender actually loads into a threat-intelligence platform, from drifting away from that CSV. It asserts:
+[`misp/run.sh`](misp/run.sh) は、指標の 2 つ目の公開形態、すぐにインポートできる MISP イベント [`detections/indicators/artex_indicators.misp.json`](../indicators/artex_indicators.misp.json) を扱います。上の指標テストが CSV をソースに根拠づけるなら、このテストは、防御側が実際に脅威インテリジェンスのプラットフォームへ読み込む成果物である MISP イベントが、その CSV からずれないように保ちます。断言するのは次のとおりです。
 
-- **It is really MISP** — the event loads under [pymisp](https://github.com/MISP/PyMISP), whose object model
-  rejects any attribute whose `type` is not a genuine MISP type. A plausible-looking but invalid type fails
-  here, so "valid MISP" is proven by the library a MISP server uses, not asserted.
-- **Row-for-row sync with the CSV** — every CSV row maps to exactly one MISP attribute with the intended type
-  and category (`http.user-agent` → `user-agent`, the guard marker `string` → `pattern-in-file`, `port` →
-  `port`, `ip-dst|port` → `ip-dst|port` with the composite `ip|port` value, and the exploration-schema `other` → `other`), and no MISP attribute is left
-  without a CSV row. The event is hand-maintained alongside the CSV, so adding, removing, or retyping a CSV
-  row without updating `artex_indicators.misp.json` to match in the same commit fails.
-- **`to_ids` mirrors the `rule` column** — a rule-backed indicator is `to_ids: true`; a host-forensic row
-  with no rule is `to_ids: false` with `disable_correlation: true`. Flipping a flag away from what the CSV
-  implies fails, so the MISP event cannot quietly over- or under-claim which fingerprints are actionable.
-- **The guard marker survives byte-for-byte** and `detections/**` is in the CI paths filter, so a change to
-  the CSV or the event triggers this suite.
+- **本当に MISP である** — イベントは [pymisp](https://github.com/MISP/PyMISP) で読み込まれ、そのオブジェクトモデルは、`type` が本物の MISP の型でない属性を拒みます。もっともらしく見えても無効な型はここで失敗するので、「妥当な MISP」は主張ではなく、MISP サーバが使うライブラリによって証明されます。
+- **CSV と行ごとの同期** — すべての CSV の行が、意図した型とカテゴリを持つ MISP 属性ちょうど 1 つに対応し（`http.user-agent` → `user-agent`、ガードマーカーの `string` → `pattern-in-file`、`port` → `port`、`ip-dst|port` → 合成した `ip|port` の値を持つ `ip-dst|port`、探索スキーマの `other` → `other`）、CSV の行を持たない MISP 属性は残りません。イベントは CSV と並んで手で維持するので、同じコミットで `artex_indicators.misp.json` を合わせて更新せずに CSV の行を追加、削除、または型変更すると失敗します。
+- **`to_ids` が `rule` 列を映す** — ルールに裏づけられた指標は `to_ids: true` です。ルールのないホストフォレンジックの行は、`disable_correlation: true` とともに `to_ids: false` です。CSV が含意するものからフラグをひっくり返すと失敗するので、MISP イベントは、どの指紋が対処可能かを、静かに過大にも過小にも主張できません。
+- **ガードマーカーがバイト単位で残り**、`detections/**` が CI の paths フィルタにあるので、CSV やイベントを変えるとこのスイートが発火します。
 
-Unlike the pure-standard-library tests above, this suite installs a pinned `pymisp` inside its container
-(nothing is installed on the host); [`misp/check.py`](misp/check.py) reads the CSV, the MISP event, and the
-CI workflow mounted read-only and writes nothing.
+上の、標準ライブラリだけで動くテストと違い、このスイートはコンテナの中にピン留めした `pymisp` をインストールします（ホストには何もインストールしません）。[`misp/check.py`](misp/check.py) は、CSV、MISP イベント、CI ワークフローを読み取り専用でマウントして読み、何も書きません。
 
-### Run it
+### 実行する
 
-Needs only Docker; pymisp is installed in the container and nothing is written to the repo.
+必要なのは Docker だけです。pymisp はコンテナにインストールされ、リポジトリには何も書き込みません。
 
 ```sh
 detections/tests/misp/run.sh
 ```
 
-The script exits non-zero if any assertion fails. Override the image with `PYTHON_IMAGE` and the pinned
-library with `PYMISP_VERSION` if you mirror them internally.
+どれかの断言が失敗するとスクリプトは 0 以外で終了します。内部にミラーがある場合は、`PYTHON_IMAGE` でイメージを、`PYMISP_VERSION` でピン留めしたライブラリを上書きできます。
 
-## Contributing
+## 貢献
 
-A new detection rule is stronger with a test that shows it firing. Tests should synthesize their own input
-deterministically, assert engine-version-independent properties exactly (and softer ones as floors with a
-recorded reference), and avoid any content that reads as attack guidance. See
-[`../../CONTRIBUTING.en.md`](../../CONTRIBUTING.en.md) and the rule indexes in [`../README.md`](../README.md).
+新しい検知ルールは、発火を示すテストがあると、より強くなります。テストは自分の入力を決定的に合成し、エンジンのバージョンに依存しない性質は正確に断言し（それより柔らかい性質は、記録した基準値つきの下限とし）、攻撃の手引きに読める内容は避けてください。[`../../CONTRIBUTING.md`](../../CONTRIBUTING.md) と、[`../README.md`](../README.md) のルール索引を参照してください。
 
-All eight suites run in CI (see [`../../.github/workflows/detections.yml`](../../.github/workflows/detections.yml))
-on every push or pull request that touches `detections/` — and the indicator test also runs when the upstream
-source files it pins (`enrich/`, `selfupdate/`, `guard/`, `db/`, `cmd/artex/main.go`) change — so a rule
-change that drops an indicator, drifts from the ATT&CK layer, stops converting on a documented backend,
-breaks a SigmaHQ convention, falls out of sync with the source, lets the MISP event drift from the CSV, or
-pins a new source the workflow does not yet watch turns the build red before it can merge.
+8 つのスイートはすべて、`detections/` に触れるすべての push または pull request で CI として動きます（[`../../.github/workflows/detections.yml`](../../.github/workflows/detections.yml) を参照）。指標テストは、それがピン留めした上流のソースファイル（`enrich/`、`selfupdate/`、`guard/`、`db/`、`cmd/artex/main.go`）が変わったときにも動きます。そのため、指標を落とし、ATT&CK レイヤーからずれ、文書化したバックエンドで変換が止まり、SigmaHQ の規約を壊し、ソースとの同期が外れ、MISP イベントを CSV からずらし、またはワークフローがまだ監視していない新しいソースをピン留めするルールの変更は、マージできる前にビルドを赤くします。

@@ -1,12 +1,16 @@
 # Changelog
 
-[한국어](CHANGELOG.md) · English · [中文 (upstream original)](CHANGELOG.zh.md)
+[日本語](CHANGELOG.md) · [한국어](CHANGELOG.ko.md) · English · [中文 (upstream original)](CHANGELOG.zh.md)
 
 This document records the changes that the ARTEX global edition (this fork) adds on top of the upstream repository. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 The upstream ARTEX project's per-version release history (0.3.x and earlier) and contributor list are preserved verbatim in Chinese in [`CHANGELOG.zh.md`](CHANGELOG.zh.md). As with `README.zh.md`, the original text is kept unchanged so that it stays easy to compare against upstream changes. The detailed content and rationale for each change can be found in the repository's commit history.
 
 ## [Unreleased]
+
+### Documentation
+
+- **Made the Markdown that readers open first Japanese.** The bodies of the README, contributing guide, security policy, code of conduct, changelog, maintainer runbook, issue and pull-request templates, defense guide, detection-rule notes, traffic-evidence design note, side-question notes, and screenshot guide are now Japanese. English stays in `*.en.md`, Korean in `*.ko.md`, and the upstream Chinese originals (`*.zh.md`) are preserved. Agent internal reasoning prompts and `skills/` stay in their original language so judged performance is unchanged.
 
 ### Localization (i18n)
 

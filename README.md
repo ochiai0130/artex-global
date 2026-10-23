@@ -1,12 +1,12 @@
 <div align="center">
 
-# ARTEX — Global Edition
+# ARTEX — グローバル版
 
-**An autonomous penetration-testing system driven by LLM multi-agents** (Go backend + Next.js frontend)
+**LLM マルチエージェントが駆動する自律型ペネトレーションテストシステム**（Go バックエンド + Next.js フロントエンド）
 
-The UI and generated output default to English, and **can be switched to Korean, Chinese, Spanish or Japanese in Settings (System → Settings → Display language).** Changing the language also changes the language of agent-generated reports, summaries and chat replies.
+UI と生成される出力はデフォルトで英語になっており、**設定（システム → 設定 → 表示言語）で韓国語・中国語・スペイン語・日本語に切り替えられます。** 言語を変えると、エージェントが生成するレポート・要約・チャット応答の言語も一緒に変わります。
 
-English · [한국어](README.ko.md) · [中文](README.zh.md) · [Español](README.es.md) · [日本語](README.ja.md)
+日本語 · [English](README.en.md) · [한국어](README.ko.md) · [中文](README.zh.md) · [Español](README.es.md)
 
 [![ci](https://github.com/jiwoochris/artex-global/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jiwoochris/artex-global/actions/workflows/ci.yml) [![detections](https://github.com/jiwoochris/artex-global/actions/workflows/detections.yml/badge.svg?branch=main)](https://github.com/jiwoochris/artex-global/actions/workflows/detections.yml) [![web](https://github.com/jiwoochris/artex-global/actions/workflows/web.yml/badge.svg?branch=main)](https://github.com/jiwoochris/artex-global/actions/workflows/web.yml) [![license: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 
@@ -14,83 +14,83 @@ English · [한국어](README.ko.md) · [中文](README.zh.md) · [Español](REA
 
 ---
 
-> ## 🚨 Security & misuse warning — read this first
+> ## 🚨 セキュリティと悪用に関する警告 — 最初にお読みください
 >
-> **This repository is published for use only within authorized environments, and only to build defensive and detection capabilities.**
+> **このリポジトリは、許可された環境の中で、かつ防御・検知の能力を育てる目的に限って利用するために公開しています。**
 >
-> ARTEX is an autonomous offensive tool powerful enough to carry an attack from reconnaissance through intrusion to data exfiltration with little human involvement, so the harm from misuse is correspondingly large. In October 2026, several Korean news outlets reported that investigators had found indications the upstream ARTEX was used in personal-data breaches targeting Korean financial institutions; the related investigation is ongoing. This global edition is not published to help attackers. Its purpose is to help defenders understand how such autonomous AI attacks work and build the capability to detect and block them.
+> ARTEX は、偵察から侵入、データの持ち出しまでを人の関与をほとんど介さずに遂行できるほど強力な自律型攻撃ツールであり、それだけに悪用による被害も大きくなります。2026 年 10 月、韓国の複数の報道機関は、調査機関が韓国の金融機関を狙った個人情報の流出事案において上流版 ARTEX が使われた痕跡を見つけたと報じました。関連する調査は現在も進行中です。このグローバル版は攻撃者を助けるために公開するものではありません。その目的は、こうした自律型 AI 攻撃がどのように動くのかを防御側が理解し、それを検知・遮断する能力を育てる手助けをすることにあります。
 >
-> - **Unauthorized use is a crime in itself.** Do not run any scanning, probing, or exploitation against systems you do not own or for which you lack explicit written authorization. In the Republic of Korea, unauthorized intrusion into an information and communications network violates the Network Act, and the Personal Information Protection Act also applies where personal data is involved.
-> - **Do not target live services or other parties' assets.** Verify only in learning, research, and locally isolated environments you own (deliberately vulnerable targets such as OWASP Juice Shop or DVWA).
-> - **Read it from a defender's point of view.** This repository also compiles defensive and detection material, such as detection signatures and hardening checklists, for autonomous AI attacks. → **[Defense & Detection Guide](docs/defense-en.md)** (also in [Korean](docs/defense-ko.md))
+> - **無許可の利用はそれ自体が犯罪です。** 自分が所有していないシステム、または明示的な書面による許可を得ていないシステムに対して、いかなるスキャン・探査・エクスプロイトも実行しないでください。大韓民国では、情報通信網への無許可の侵入は情報通信網法（Network Act）に違反し、個人情報が関わる場合には個人情報保護法（Personal Information Protection Act）も適用されます。
+> - **稼働中のサービスや第三者の資産を標的にしないでください。** 自分が所有する、学習・研究・ローカルに隔離された環境でのみ検証してください（OWASP Juice Shop や DVWA のように、意図的に脆弱に作られた標的）。
+> - **防御側の視点で読んでください。** このリポジトリには、自律型 AI 攻撃に対する検知シグネチャやハードニングのチェックリストといった防御・検知の資料もまとめてあります。→ **[防御・検知ガイド](docs/defense-ja.md)**（[English](docs/defense-en.md) · [한국어](docs/defense-ko.md)）
 >
-> If you do not agree to this warning and to the [usage restrictions and disclaimer](#license-and-disclaimer) below, do not download or use this repository.
+> この警告、および下記の[利用制限と免責事項](#ライセンスと免責事項)に同意できない場合は、このリポジトリをダウンロードしたり利用したりしないでください。
 
 ---
 
-> **This repository is a localized edition of the Chinese open-source project [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) (AGPL-3.0 · upstream repository currently unreachable, checked 2026-10), adapted so that users and teams worldwide can adopt it as-is.** To preserve the agents' decision-making performance, the internal reasoning prompts are kept in the original language, and only the user-facing output (findings, summaries, reports, chat replies) is forced into the selected language (English by default). See ["Why a global edition"](#why-a-global-edition) below for the rationale.
+> **このリポジトリは、中国発のオープンソースプロジェクト [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX)（AGPL-3.0 · 上流リポジトリは現在アクセス不可、2026-10 確認）を、世界中のユーザーやチームがそのまま採用できるようにローカライズした版です。** エージェントの意思決定性能を保つため、内部の推論プロンプトは原語のまま維持し、ユーザー向けの出力（検出結果・要約・レポート・チャット応答）だけを選択した言語（デフォルトは英語）に強制します。その理由は下記の[「なぜグローバル版なのか」](#なぜグローバル版なのか)で説明します。
 
-ARTEX is a system in which several LLM-driven agents autonomously run a penetration test: they **break goals down on their own, execute real tools, and accumulate discovered assets and vulnerabilities into a graph** as they go. A single Go binary ships with the Next.js frontend embedded, and all data is stored in PostgreSQL.
+ARTEX は、LLM が駆動する複数のエージェントが自律的にペネトレーションテストを進めるシステムです。エージェントは **自分で目標を分解し、実際のツールを実行し、発見した資産と脆弱性をグラフに積み上げていきます。** Go の単一バイナリに Next.js フロントエンドが埋め込まれており、すべてのデータは PostgreSQL に保存されます。
 
-> **Note on this edition's language.** This fork makes the product usable in five languages — **English (default), Korean, Chinese, Spanish, and Japanese** — selectable in Settings. The user-facing output is forced into the selected language, while the agents' internal reasoning prompts are kept in the original language to preserve benchmarked performance. See [Configuration](#configuration) for how the output language is enforced by a small code-fixed directive.
-
----
-
-## ⚠️ Read first — authorized use and legal notice
-
-ARTEX may be used **only against targets you own or for which you have explicit written authorization.** Any scanning, probing, or exploitation beyond the authorized scope may itself be illegal.
-
-- In the Republic of Korea, intruding into or disrupting another party's information and communications network without authorization violates the **Act on Promotion of Information and Communications Network Utilization and Information Protection** (정보통신망법).
-- Personal data collected or exposed during a penetration test is subject to the Korean **Personal Information Protection Act** (개인정보보호법). Even with authorization, handle the access, retention, and deletion of personal data with care.
-- Wherever you are, comply with your own jurisdiction's laws on network security, data protection, and computer crime.
-- Use this for **learning, research, and verification in locally isolated environments.** Before targeting any live external system, secure written authorization and an agreed scope and time window.
-
-Full license terms, usage restrictions, and the disclaimer are in the [License and disclaimer](#license-and-disclaimer) section below. Using this tool constitutes your agreement to those terms.
+> **この版の言語についての注記。** このフォークは、製品を 5 つの言語 — **英語（デフォルト）、韓国語、中国語、スペイン語、日本語** — で利用できるようにし、設定で選べるようにしました。ユーザー向けの出力は選択した言語に強制される一方、エージェントの内部推論プロンプトはベンチマークされた性能を保つために原語のまま維持されます。出力言語が小さなコード固定のディレクティブによってどのように強制されるかは[設定](#設定)を参照してください。
 
 ---
 
-## Why a global edition
+## ⚠️ 最初にお読みください — 許可された利用と法的告知
 
-Upstream ARTEX has its prompts, UI, and documentation entirely in Chinese, which made it cumbersome for anyone who does not read Chinese to read the results and share them with a team. This edition aims to:
+ARTEX は、**自分が所有する標的、または明示的な書面による許可を得ている標的に対してのみ** 利用できます。許可された範囲を超えるスキャン・探査・エクスプロイトは、それ自体が違法となる場合があります。
 
-- **Localize the output** — the findings, fact summaries, final reports, and chat replies that agents surface to a human are forced into the selected language (English by default; Korean, Chinese, Spanish, and Japanese selectable). Commands, payloads, code, URLs, and raw logs are needed for analysis and are left in their original form.
-- **Preserve performance** — the internal reasoning prompts (the behavioral instruction body) that drive the agents' judgment are **not** translated. Behavior benchmarked in the original language is kept intact, and only the output language is changed, avoiding the quality drift that translation introduces.
-- **State the legal boundaries** — the "authorized scope only" warning is stated clearly, together with Korea-specific notices on network and privacy law (the maintainers are based in Korea); the law of wherever you operate applies as well.
-- **Support diverse LLM stacks** — the LLM provider can be swapped from a frontier model to any OpenAI-compatible endpoint (domestic or open models). See [Configuration](#configuration).
+- 大韓民国では、第三者の情報通信網に無許可で侵入したり、それを妨害したりする行為は **「情報通信網利用促進及び情報保護等に関する法律」**（정보통신망법）に違反します。
+- ペネトレーションテストの過程で収集・露出した個人情報は、韓国の **「個人情報保護法」**（개인정보보호법）の対象になります。許可があっても、個人情報のアクセス・保管・削除は慎重に扱ってください。
+- どの地域にいても、ネットワークセキュリティ・データ保護・コンピュータ犯罪に関する、自らの管轄区域の法律を遵守してください。
+- **学習・研究、およびローカルに隔離された環境での検証** に利用してください。稼働中の外部システムを標的にする前には、書面による許可と、合意されたスコープおよび時間枠を必ず確保してください。
 
-> The boundaries and design policy of this multilingual edition are documented in more detail in the repository's working notes. To make it easy to diff against the upstream repository, the original Chinese document is preserved as [`README.zh.md`](README.zh.md).
+ライセンスの完全な条項、利用制限、免責事項は下記の[ライセンスと免責事項](#ライセンスと免責事項)の節にあります。このツールを利用することは、それらの条項に同意したものとみなされます。
 
 ---
 
-## Screenshots
+## なぜグローバル版なのか
 
-The three screens below show the default English UI (switchable to Korean, Chinese, Spanish, and Japanese in Settings). The data comes from a local, isolated sandbox: every target is the fictional `acme.com` and private address ranges.
+上流の ARTEX はプロンプト・UI・ドキュメントがすべて中国語になっており、中国語を読まない人にとっては結果を読んでチームと共有するのが面倒でした。この版は次のことを目指します。
+
+- **出力をローカライズする** — エージェントが人に提示する検出結果・事実の要約・最終レポート・チャット応答を、選択した言語（デフォルトは英語。韓国語・中国語・スペイン語・日本語が選択可能）に強制します。コマンド・ペイロード・コード・URL・生ログは分析に必要なので、原形のまま残します。
+- **性能を保つ** — エージェントの判断を駆動する内部の推論プロンプト（行動指示の本体）は翻訳**しません**。原語でベンチマークされた挙動をそのまま保ち、出力言語だけを変えることで、翻訳が持ち込む品質のブレを避けます。
+- **法的な境界を明示する** — 「許可された範囲のみ」という警告を明確に述べ、あわせてネットワーク法・プライバシー法に関する韓国固有の告知（メンテナーは韓国に拠点があります）を添えます。あなたが活動する地域の法律も同様に適用されます。
+- **多様な LLM スタックに対応する** — LLM プロバイダをフロンティアモデルから任意の OpenAI 互換エンドポイント（国内モデルやオープンモデル）に差し替えられます。[設定](#設定)を参照してください。
+
+> この多言語版の境界と設計方針は、リポジトリの作業ノートにより詳しく記録されています。上流リポジトリとの差分(diff)を取りやすいように、オリジナルの中国語ドキュメントは [`README.zh.md`](README.zh.md) として保存してあります。
+
+---
+
+## スクリーンショット
+
+下の 3 つの画面は、デフォルトの英語 UI です（設定で韓国語・中国語・スペイン語・日本語に切り替え可能）。データはローカルに隔離されたサンドボックスのもので、標的はすべて架空の `acme.com` とプライベートアドレス帯です。
 
 <p align="center">
-  <img src="screenshots/en/dashboard.png" width="900" alt="Dashboard overview"><br>
-  <sub><b>Dashboard</b> — active tasks, confirmed findings, asset nodes, LLM token spend, and the activity feed on one screen.</sub>
+  <img src="screenshots/en/dashboard.png" width="900" alt="ダッシュボードの概要"><br>
+  <sub><b>ダッシュボード</b> — 進行中のタスク、確定した検出結果、資産ノード、LLM のトークン消費、アクティビティフィードを 1 画面にまとめています。</sub>
 </p>
 
 <p align="center">
-  <img src="screenshots/en/findings.png" width="900" alt="Findings list"><br>
-  <sub><b>Findings</b> — results aggregated by severity, status, asset, and owning task, exportable to CSV.</sub><br>
-  <sub>Finding <b>titles</b> are model-generated, so English technical terms can appear, mirroring the target app ([Model selection and output language](#model-selection-and-output-language)). The description under each title and the rest of the UI are in English (the default; switchable in Settings).</sub>
+  <img src="screenshots/en/findings.png" width="900" alt="検出結果の一覧"><br>
+  <sub><b>検出結果</b> — 深刻度・ステータス・資産・担当タスクごとに集計され、CSV にエクスポートできます。</sub><br>
+  <sub>検出結果の<b>タイトル</b>はモデルが生成するため、標的アプリを反映して英語の技術用語が現れることがあります（[モデル選択と出力言語](#モデル選択と出力言語)）。各タイトルの下の説明と UI の残りの部分は英語（デフォルト。設定で切り替え可能）です。</sub>
 </p>
 
 <p align="center">
-  <img src="screenshots/en/chat.png" width="900" alt="Human-in-the-loop chat"><br>
-  <sub><b>Chat</b> — a human steps into the autonomous run to inject hints while the agent summarizes the attack chain in English.</sub>
+  <img src="screenshots/en/chat.png" width="900" alt="human-in-the-loop チャット"><br>
+  <sub><b>チャット</b> — 自律実行の途中に人が割り込んでヒントを注入し、その間エージェントは攻撃チェーンを英語で要約します。</sub>
 </p>
 
-The original (Chinese UI) screens are available in [`README.zh.md`](README.zh.md#截图预览) (Chinese UI).
+オリジナル（中国語 UI）の画面は [`README.zh.md`](README.zh.md#截图预览)（中国語 UI）で見られます。
 
 ---
 
-## Quick start (Docker Compose)
+## クイックスタート（Docker Compose）
 
-> **Prerequisites:** Docker and Docker Compose. The database is **PostgreSQL**, brought up by compose. Exploration requires an **LLM** (`ANTHROPIC_API_KEY` or `OPENAI_API_KEY`; can also be set in the UI).
+> **前提条件:** Docker と Docker Compose。データベースは **PostgreSQL** で、compose が立ち上げます。探索には **LLM**（`ANTHROPIC_API_KEY` または `OPENAI_API_KEY`。UI でも設定できます）が必要です。
 
-> **Image:** the `artex` service in `docker-compose.yml` pulls `ghcr.io/jiwoochris/artex-global`, the global-edition image this repository publishes to GitHub Container Registry on every release tag (`v*`). The default tag is `latest` (the most recent release); set `ARTEX_TAG` in `.env` to pin a specific release. Upstream's original image `autumn27/artex` has been taken down from Docker Hub and is no longer used.
+> **イメージ:** `docker-compose.yml` の `artex` サービスは `ghcr.io/jiwoochris/artex-global` を取得します。これは、このリポジトリがリリースタグ（`v*`）ごとに GitHub Container Registry に公開するグローバル版のイメージです。デフォルトのタグは `latest`（最新リリース）です。特定のリリースに固定するには `.env` で `ARTEX_TAG` を設定してください。上流のオリジナルイメージ `autumn27/artex` は Docker Hub から取り下げられており、もう使われていません。
 
 ```bash
 git clone https://github.com/jiwoochris/artex-global.git
@@ -101,14 +101,14 @@ docker compose up -d          # brings up the artex image + postgres together
 #   /setup asks for the setup token printed in the startup log: docker compose logs artex | grep -F '[auth]'
 ```
 
-The image bundles common tools (ripgrep, curl, vim, npm, nmap, and more), and when brought up with compose, `./skills` and `./data` are bind-mounted to the host and survive container recreation.
+イメージには一般的なツール（ripgrep、curl、vim、npm、nmap など）が同梱されており、compose で立ち上げると `./skills` と `./data` がホストに bind-mount され、コンテナを作り直しても残ります。
 
-### Other installation methods
+### その他のインストール方法
 
-Upstream provides several methods: an install script (`./install.sh`), precompiled binaries (Releases), and a single-binary build from source. The commands and full procedure are collected in the "安装" (Installation) section of [`README.zh.md`](README.zh.md#安装) (in Chinese); the essentials are reproduced below.
+上流はいくつかの方法を提供しています。インストールスクリプト（`./install.sh`）、プリコンパイル済みバイナリ（Releases）、ソースからの単一バイナリビルドです。コマンドと手順の全体は [`README.zh.md`](README.zh.md#安装) の「安装」（インストール）の節（中国語）にまとめてありますが、要点を以下に再掲します。
 
-- **Install script:** running `./install.sh` detects/installs Docker and then lets you choose "① all-in-Docker" or "② local compile and run." "① all-in-Docker" pulls and starts the same image as the quick start above (`ghcr.io/jiwoochris/artex-global`), while "② local compile and run" builds it yourself the same way as the **single-binary build from source** below.
-- **Single-binary build from source:**
+- **インストールスクリプト:** `./install.sh` を実行すると Docker を検出／インストールし、続いて「① すべて Docker で」または「② ローカルでコンパイルして実行」を選べます。「① すべて Docker で」は上記のクイックスタートと同じイメージ（`ghcr.io/jiwoochris/artex-global`）を取得して起動します。一方「② ローカルでコンパイルして実行」は、下記の **ソースからの単一バイナリビルド** と同じやり方で自分でビルドします。
+- **ソースからの単一バイナリビルド:**
 
   ```bash
   cd web && npm ci && npm run build:static && cd ..   # 1) static frontend build
@@ -117,15 +117,15 @@ Upstream provides several methods: an install script (`./install.sh`), precompil
   ./start.sh                                          # → http://localhost:8787
   ```
 
-> The `npm ci` in step 1) installs the devDependencies the build needs (e.g. `@tailwindcss/postcss`). If your shell has `NODE_ENV=production` set, `npm ci` skips devDependencies and the build fails with `Error: Cannot find module '@tailwindcss/postcss'`; in that case install with `npm ci --include=dev`.
+> 手順 1) の `npm ci` は、ビルドが必要とする devDependencies（例: `@tailwindcss/postcss`）をインストールします。シェルに `NODE_ENV=production` が設定されていると `npm ci` は devDependencies を省略し、ビルドは `Error: Cannot find module '@tailwindcss/postcss'` で失敗します。その場合は `npm ci --include=dev` でインストールしてください。
 
-> Launch with `start.sh` (`start.bat` on Windows) rather than running `./artex` directly. That script is a supervisor that restarts the program based on its exit code, and it also handles the UI's "one-click update."
+> `./artex` を直接実行するのではなく、`start.sh`（Windows では `start.bat`）で起動してください。このスクリプトは、プログラムの終了コードに応じて再起動するスーパーバイザであり、UI の「ワンクリック更新」も処理します。
 
 ---
 
-## Configuration
+## 設定
 
-**Database** (`config.json`, or override with the `ARTEX_PG_DSN` environment variable):
+**データベース**（`config.json`、または環境変数 `ARTEX_PG_DSN` で上書き）:
 
 ```json
 {
@@ -137,71 +137,71 @@ Upstream provides several methods: an install script (`./install.sh`), precompil
 }
 ```
 
-**LLM:** `export ANTHROPIC_API_KEY=sk-...` (or `OPENAI_API_KEY`), or enter it on the UI's "LLM settings" page. Optional environment variables: `ARTEX_LLM_PROVIDER` / `ARTEX_LLM_MODEL` / `ARTEX_LLM_BASE_URL` / `ARTEX_LLM_PROXY`. To use a domestic or open model, point `ARTEX_LLM_BASE_URL` at an OpenAI-compatible endpoint.
+**LLM:** `export ANTHROPIC_API_KEY=sk-...`（または `OPENAI_API_KEY`）、あるいは UI の「LLM settings」ページで入力します。任意の環境変数: `ARTEX_LLM_PROVIDER` / `ARTEX_LLM_MODEL` / `ARTEX_LLM_BASE_URL` / `ARTEX_LLM_PROXY`。国内モデルやオープンモデルを使うには、`ARTEX_LLM_BASE_URL` を OpenAI 互換エンドポイントに向けてください。
 
-**Output language:** this edition forces user-facing output into the selected language (English by default) via a small, code-fixed directive appended to each role's system prompt (it does not translate the reasoning body). Switch languages in Settings, or adapt that directive in `agent/prompt.go` (`langDirective`).
+**出力言語:** この版は、各ロールの system prompt に付加される小さなコード固定のディレクティブによって、ユーザー向けの出力を選択した言語（デフォルトは英語）に強制します（推論の本体は翻訳しません）。設定で言語を切り替えるか、`agent/prompt.go`（`langDirective`）でそのディレクティブを調整してください。
 
-**Concurrency:** the number of worker agents spawned per task is adjustable under "System settings" (default 3).
+**並行度:** タスクごとに生成されるワーカーエージェントの数は「System settings」で調整できます（デフォルトは 3）。
 
-**Common flags:** `./start.sh -addr :8787 -proxy :8788` — `-addr` is the frontend and API, `-proxy` is the traffic-recording proxy port. `-addr` defaults to `127.0.0.1:8787` (local connections only); pass an explicit bind address such as `:8787` to serve other machines (see "First-run protection" below).
+**よく使うフラグ:** `./start.sh -addr :8787 -proxy :8788` — `-addr` はフロントエンドと API、`-proxy` はトラフィック記録プロキシのポートです。`-addr` のデフォルトは `127.0.0.1:8787`（ローカル接続のみ）です。他のマシンに提供するには `:8787` のような明示的なバインドアドレスを渡してください（下記の「初回起動時の保護」を参照）。
 
-### Model selection and output language
+### モデル選択と出力言語
 
-The output-language enforcement is **driven by a prompt directive (`langDirective()` in `agent/prompt.go`), not a hard-coded cap.** So how consistently the output stays in the selected language depends on the model's capability, the role, and the context. The validation figures below were measured with Korean output while Korean was the default; the same trend holds for the other languages.
+出力言語の強制は **プロンプトのディレクティブ（`agent/prompt.go` の `langDirective()`）によって駆動されるものであり、ハードコードされた上限ではありません。** そのため、出力がどれだけ一貫して選択言語にとどまるかは、モデルの能力・ロール・コンテキストに依存します。下記の検証値は、韓国語がデフォルトだったときに韓国語出力で測定したものですが、同じ傾向が他の言語にも当てはまります。
 
-- **Use a capable frontier model.** In a short validation run that applied only the production directive against a local isolated sandbox, the default model `claude-opus-4-8` kept user-facing output in Korean across all four roles — planner, worker, reporter, and an authorized-sandbox planning request — with no refusals. `gpt-4o` also stayed in Korean on the same scenarios. A cheaper, smaller model (for example `gpt-4o-mini`), by contrast, let the report fall back to the original language. Output-language quality tracks model capability directly, so use a capable model wherever a human reads the report.
-- **Some role- and context-dependent drift remains.** Divergence shows up in role and output format more than in language itself. In particular, short outputs such as the worker's final one-sentence summary can expose the model's English chain-of-thought verbatim, and the structured fields of `report_finding` can lean toward English, mirroring the target app and its technical terms. In an earlier run, `gpt-4o`'s planner situation summary also reverted to the original language on some turns. Stating "write in the selected language" explicitly in the task instruction raises the fidelity.
-- **Give reasoning models a generous `max_tokens`.** A reasoning model that uses a separate thinking channel can spend a small response-token budget entirely on internal reasoning and leave the user-facing final answer empty. Here the answer itself disappears rather than the language, so set that LLM profile's `max_tokens` high enough.
+- **能力の高いフロンティアモデルを使ってください。** ローカルに隔離されたサンドボックスに対して本番用ディレクティブのみを適用した短い検証では、デフォルトモデル `claude-opus-4-8` は 4 つのロール — planner、worker、reporter、および許可されたサンドボックスでのプランニング要求 — のすべてで、拒否を一度もせずユーザー向け出力を韓国語に保ちました。`gpt-4o` も同じシナリオで韓国語を保ちました。一方、より安価で小さいモデル（例えば `gpt-4o-mini`）では、レポートが原語に戻ってしまいました。出力言語の品質はモデルの能力に直結するので、人がレポートを読む箇所では能力の高いモデルを使ってください。
+- **ロールやコンテキストに依存するブレは残ります。** 乖離は言語そのものよりも、ロールと出力フォーマットに現れます。特に、worker の最終的な一文要約のような短い出力では、モデルの英語の思考連鎖がそのまま露出することがあり、`report_finding` の構造化フィールドは、標的アプリとその技術用語を反映して英語に寄ることがあります。以前の実行では、`gpt-4o` の planner の状況要約も一部のターンで原語に戻りました。タスク指示の中で「選択した言語で書く」ことを明示的に述べると、忠実度が上がります。
+- **推論モデルには潤沢な `max_tokens` を与えてください。** 別個の思考チャネルを使う推論モデルは、小さな応答トークンの予算を内部推論ですべて使い切り、ユーザー向けの最終回答を空のまま残すことがあります。ここでは言語ではなく回答そのものが消えるので、その LLM プロファイルの `max_tokens` を十分に高く設定してください。
 
-> **Token-cap pitfall on the OpenAI-compatible path.** OpenAI-family models such as `gpt-4o` cap response tokens at 16,384. OpenAI-compatible requests, however, carry a larger default output cap (32,768), so leaving it unchanged makes every call fail with `400 (max_tokens is too large)`. In that case, **set that profile's `max_tokens` to 16,384 or lower on the LLM settings page.** Anthropic-family models (including the default `claude-opus-4-8`) allow 32,768 and do not hit this pitfall.
+> **OpenAI 互換パスでのトークン上限の落とし穴。** `gpt-4o` のような OpenAI 系のモデルは応答トークンを 16,384 に制限しています。ところが OpenAI 互換リクエストはより大きなデフォルト出力上限（32,768）を持つため、そのままにしておくとすべての呼び出しが `400 (max_tokens is too large)` で失敗します。その場合は、**LLM settings ページでそのプロファイルの `max_tokens` を 16,384 以下に設定してください。** Anthropic 系のモデル（デフォルトの `claude-opus-4-8` を含む）は 32,768 を許容し、この落とし穴には当たりません。
 
-### First-run protection (setup token and bind address)
+### 初回起動時の保護（セットアップトークンとバインドアドレス）
 
-There is a single admin account (`ARTEX`) whose password is created on the first visit at `/setup`. So that whoever reaches a not-yet-initialised instance first cannot claim it, the following protections apply.
+管理者アカウントは単一（`ARTEX`）で、そのパスワードは初回アクセス時に `/setup` で作成されます。まだ初期化されていないインスタンスに最初に到達した者がそれを横取りできないよう、次の保護が適用されます。
 
-- **Setup token.** When the server starts without a password it prints one line `[auth] … Setup token: …` to the console (`docker compose logs artex` under Docker). `/setup` and `POST /api/auth/init` (`setup_token` field) only create the password when that value matches, and wrong attempts are rate-limited. For unattended deployments pin it with `ARTEX_SETUP_TOKEN`, or set the password directly with `ARTEX_ADMIN_PASSWORD` (8+ characters).
-- **Binds to 127.0.0.1 by default.** Both the `-addr` default of `artex` and the port publishing in `docker-compose.yml` open the loopback interface only. To reach it from other machines use `-addr :8787` or `ARTEX_BIND=0.0.0.0` in `.env`, but finish the initial setup first and prefer the reverse-proxy layout below. Starting without a password on a non-loopback address logs a warning.
-- **Changing the password ends every session.** The token signing key is bound to the password hash, so tokens issued before a change (from the UI, `reset-password.sh`, or a direct DB edit) stop working within seconds. When recovering from a compromised account, also review custom tools, MCP, LLM and notification settings after changing the password.
-- **CORS.** `/api` only answers cross-origin browser calls from origins listed in `ARTEX_CORS_ORIGINS` (comma-separated). The embedded UI is same-origin, so this is normally empty; the default only allows `next dev` from `dev.sh` (`http://localhost:5173`).
+- **セットアップトークン。** サーバーがパスワードなしで起動すると、`[auth] … Setup token: …` という 1 行をコンソール（デフォルト言語が英語のため、ログも英語で出力されます。Docker では `docker compose logs artex`）に出力します。`/setup` と `POST /api/auth/init`（`setup_token` フィールド）は、その値が一致したときにのみパスワードを作成し、誤った試行はレート制限されます。無人デプロイでは `ARTEX_SETUP_TOKEN` で固定するか、`ARTEX_ADMIN_PASSWORD`（8 文字以上）で直接パスワードを設定してください。
+- **デフォルトで 127.0.0.1 にバインドします。** `artex` の `-addr` のデフォルトも、`docker-compose.yml` でのポート公開も、ループバックインターフェースのみを開きます。他のマシンから到達するには `-addr :8787` か、`.env` の `ARTEX_BIND=0.0.0.0` を使いますが、まず初期セットアップを済ませ、下記のリバースプロキシ構成を優先してください。ループバック以外のアドレスでパスワードなしに起動すると、警告がログに出ます。
+- **パスワードを変えるとすべてのセッションが終了します。** トークンの署名鍵はパスワードのハッシュに紐づいているため、変更前（UI、`reset-password.sh`、または DB の直接編集による）に発行されたトークンは数秒以内に使えなくなります。侵害されたアカウントから復旧する際は、パスワードを変えたあと、カスタムツール・MCP・LLM・通知の設定も見直してください。
+- **CORS。** `/api` は、`ARTEX_CORS_ORIGINS`（カンマ区切り）に列挙されたオリジンからのクロスオリジンのブラウザ呼び出しにのみ応答します。埋め込み UI は同一オリジンなので、これは通常は空です。デフォルトでは `dev.sh` からの `next dev`（`http://localhost:5173`）のみを許可します。
 
-### Reverse-proxy deployment (HTTPS / expose only 443)
+### リバースプロキシでのデプロイ（HTTPS / 443 のみ公開）
 
-The frontend and the API/SSE are both served by the same backend port (default `:8787`), and the live activity stream connects **same-origin** by default. So there is no need to set `NEXT_PUBLIC_SSE_BASE` separately: expose only 443 to the public network and keep 8787 internal.
+フロントエンドと API/SSE はどちらも同じバックエンドポート（デフォルト `:8787`）が提供し、ライブのアクティビティストリームはデフォルトで **同一オリジン** に接続します。そのため `NEXT_PUBLIC_SSE_BASE` を別途設定する必要はありません。公開ネットワークには 443 だけを公開し、8787 は内部に留めてください。
 
-SSE holds a long-lived connection and keeps pushing events, so you **must disable buffering** in the reverse proxy. If you don't, the browser connects but receives no events (the activity stream appears stuck loading). An Nginx configuration example is in [`README.zh.md`](README.zh.md#反向代理部署https--只开放-443).
+SSE は長時間の接続を保持してイベントを送り続けるので、リバースプロキシで **バッファリングを必ず無効化** してください。無効化しないと、ブラウザは接続してもイベントを受け取れません（アクティビティストリームが読み込み中のまま止まって見えます）。Nginx の設定例は [`README.zh.md`](README.zh.md#反向代理部署https--只开放-443) にあります。
 
 ---
 
-## System architecture
+## システムアーキテクチャ
 
-ARTEX is an **autonomous penetration system driven by LLM multi-agents.** It uses a single Go backend (with the Next.js frontend embedded) over PostgreSQL, and the agent capabilities are provided by the [`norma`](https://github.com/Autumn-27/norma) (currently unreachable, checked 2026-10) SDK. At its core is a **dual-graph structure** and the two autonomy mechanisms around it: process-level information exchange between workers, and the planner's multi-round shared todolist.
+ARTEX は **LLM マルチエージェントが駆動する自律型ペネトレーションシステム** です。PostgreSQL の上で、単一の Go バックエンド（Next.js フロントエンドを埋め込み）を使い、エージェントの能力は [`norma`](https://github.com/Autumn-27/norma)（現在アクセス不可、2026-10 確認）SDK が提供します。その中核にあるのは **デュアルグラフ構造** と、それを取り巻く 2 つの自律メカニズム — ワーカー間のプロセスレベルの情報交換と、planner のマルチラウンド共有 todolist です。
 
-### Overall layers
+### 全体のレイヤー
 
 ```mermaid
 flowchart TB
-  subgraph FE["Frontend Next.js (embedded in the single binary via go:embed)"]
-    UI["Dashboard · Tasks · Assets · Coverage graph · Traffic · Workspace · System settings"]
+  subgraph FE["Frontend Next.js（単一バイナリに go:embed で埋め込み）"]
+    UI["ダッシュボード · タスク · 資産 · カバレッジグラフ · トラフィック · ワークスペース · システム設定"]
   end
   subgraph SRV["server (Go net/http)"]
-    API["REST /api/*　JWT auth　SSE"]
-    ENG["engine scheduling loop"]
-    MGR["Manager　task/engine/store lifecycle"]
+    API["REST /api/*　JWT 認証　SSE"]
+    ENG["engine のスケジューリングループ"]
+    MGR["Manager　task/engine/store のライフサイクル"]
   end
   subgraph AG["agent (norma SDK)"]
-    GO["goals　goal decomposition + scope extraction"]
-    PL["planner　the only intent producer"]
-    WK["worker　executor ×N"]
+    GO["goals　目標分解 + スコープ抽出"]
+    PL["planner　唯一の intent 生成者"]
+    WK["worker　実行役 ×N"]
     MA["mainagent　human-in-the-loop"]
   end
   subgraph DB["PostgreSQL"]
-    AGRAPH["Asset graph　assets / companies / task_scope"]
-    EGRAPH["Exploration graph　exploration_nodes / anchors / activity"]
+    AGRAPH["資産グラフ　assets / companies / task_scope"]
+    EGRAPH["探索グラフ　exploration_nodes / anchors / activity"]
   end
-  subgraph SUB["Supporting subsystems"]
-    PROXY["traffic-recording proxy　MITM + CA recording"]
-    GUARD["guard / intercept　tool approval gate"]
-    ENR["enrich　async DNS / HTTP enrichment"]
+  subgraph SUB["補助サブシステム"]
+    PROXY["トラフィック記録プロキシ　MITM + CA 記録"]
+    GUARD["guard / intercept　ツール承認ゲート"]
+    ENR["enrich　非同期 DNS / HTTP エンリッチ"]
     EXT["MCP · skills · memory · report"]
   end
 
@@ -215,7 +215,7 @@ flowchart TB
   WK --> DB
   MA --> DB
   GO --> DB
-  WK -->|"records the full Bash / HTTP process"| PROXY
+  WK -->|"Bash / HTTP の全プロセスを記録"| PROXY
   WK --> GUARD
   WK --> ENR
   PL -.-> EXT
@@ -223,24 +223,24 @@ flowchart TB
   MA -.-> EXT
 ```
 
-- **Frontend** — the Next.js static build is embedded into the single binary with `go:embed`. It visualizes tasks, assets, exploration chains, and the coverage graph, and provides the human-in-the-loop chat.
-- **server** — handles `net/http` routing, JWT auth, and SSE; the `Manager` owns the lifecycle of tasks, engines, and the DB store.
-- **engine** — per task, runs one `plannerLoop` and N worker goroutines, handling intent assignment, timeouts, pause, and drain.
-- **agent** — split into goals / planner / worker / mainagent; the `ToolSet` exposes the dual graph as LLM tools.
-- **db** — stores the dual graph in PostgreSQL (pgx); the schema embedded via `go:embed` idempotently creates the tables on every startup.
-- **support** — the recording MITM proxy, the approval gate, async enrichment, and MCP / skills / memory / report.
+- **Frontend** — Next.js の静的ビルドが `go:embed` で単一バイナリに埋め込まれます。タスク・資産・探索チェーン・カバレッジグラフを可視化し、human-in-the-loop チャットを提供します。
+- **server** — `net/http` のルーティング、JWT 認証、SSE を扱います。`Manager` がタスク・エンジン・DB ストアのライフサイクルを所有します。
+- **engine** — タスクごとに 1 つの `plannerLoop` と N 個の worker goroutine を走らせ、intent の割り当て・タイムアウト・一時停止・ドレインを扱います。
+- **agent** — goals / planner / worker / mainagent に分かれます。`ToolSet` がデュアルグラフを LLM のツールとして公開します。
+- **db** — デュアルグラフを PostgreSQL（pgx）に保存します。`go:embed` で埋め込まれたスキーマが、起動のたびにべき等にテーブルを作成します。
+- **support** — 記録型 MITM プロキシ、承認ゲート、非同期エンリッチ、そして MCP / skills / memory / report。
 
-### The dual graph: exploration graph + asset graph
+### デュアルグラフ：探索グラフ + 資産グラフ
 
-The system separates "what the target is" from "how far it has been tested" into two graphs that are independent yet linked by anchors.
+システムは「標的が何であるか」と「どこまでテストされたか」を、互いに独立しながらアンカーで連結された 2 つのグラフに分けます。
 
-- **Asset graph (globally shared)** — the source-of-truth asset store shared across tasks. Nodes are `root_domain / subdomain / ip / service / app / endpoint` and belong to a company. The parent-child relationships (domain → subdomain → service → endpoint) and the dedup keys are all computed by the program; agents submit only the raw information.
-- **Exploration graph (independent per task)** — the "thinking and progress" of a single task. Nodes are `goal / intent / fact / finding / hint`, connected by edges such as `spawns / derived_from / yields / proves` to form lineage chains.
-- **The two graphs are linked by anchors** — `exploration_anchors(node_id, asset_id)` pins intents, facts, and findings to concrete assets. This lets you query, from the exploration side, which asset a direction was attacking, and conversely which intent tested a given asset in this task and what facts it produced — in both directions.
+- **資産グラフ（グローバル共有）** — タスクをまたいで共有される、信頼できる情報源となる資産ストアです。ノードは `root_domain / subdomain / ip / service / app / endpoint` で、1 つの企業に属します。親子関係（domain → subdomain → service → endpoint）や重複排除キーはすべてプログラムが計算し、エージェントは生の情報だけを提出します。
+- **探索グラフ（タスクごとに独立）** — 単一タスクの「思考と進捗」です。ノードは `goal / intent / fact / finding / hint` で、`spawns / derived_from / yields / proves` などのエッジでつながれて系譜チェーンを形成します。
+- **2 つのグラフはアンカーで連結されます** — `exploration_anchors(node_id, asset_id)` が intent・fact・finding を具体的な資産に固定します。これにより、探索側から「ある方向がどの資産を攻撃していたか」を、逆に「このタスクで、ある資産をどの intent がテストし、どんな fact を生んだか」を、双方向に問い合わせられます。
 
 ```mermaid
 flowchart LR
-  subgraph EG["Exploration graph (per task · progress chain)"]
+  subgraph EG["探索グラフ（タスクごと · 進捗チェーン）"]
     direction TB
     G["goal"]
     I1["intent A"]
@@ -252,7 +252,7 @@ flowchart LR
     F1 -->|derived_from| I2
     I2 -->|proves| FD
   end
-  subgraph AG["Asset graph (globally shared · source of truth)"]
+  subgraph AG["資産グラフ（グローバル共有 · 信頼できる情報源）"]
     direction TB
     RD["root_domain"]
     SD["subdomain"]
@@ -266,11 +266,11 @@ flowchart LR
   FD -. anchor .-> EP
 ```
 
-> Division of roles: the **planner** reads the state of the exploration graph and judges goals, emitting **intents** to the frontier only when there is a new direction not yet covered. A **worker** takes a **single intent**, executes it with real tools, writes the new assets/facts/findings into both graphs, and then stops. The asset graph is shared truth; the exploration graph is the per-task progress chain.
+> ロールの分担: **planner** は探索グラフの状態を読んで目標を判断し、まだカバーされていない新しい方向があるときにのみ **intent** をフロンティアに発行します。**worker** は **単一の intent** を取り、実際のツールで実行し、新しい資産/事実/検出結果を両方のグラフに書き込んでから停止します。資産グラフは共有された真実、探索グラフはタスクごとの進捗チェーンです。
 
-### The engine and the intent lifecycle (one closed exploration loop)
+### エンジンと intent のライフサイクル（閉じた探索ループ）
 
-The engine is an **event-driven** closed loop. When the graph changes it wakes the planner; when the planner emits an intent a worker claims and executes it and writes the results; that write in turn triggers the next round. This cycle continues until a goal is proven (`prove_goal`).
+エンジンは **イベント駆動** の閉じたループです。グラフが変わると planner を起こし、planner が intent を発行すると worker がそれを受け取って実行し結果を書き込みます。その書き込みが次のラウンドを引き起こします。このサイクルは、目標が証明される（`prove_goal`）まで続きます。
 
 ```mermaid
 sequenceDiagram
@@ -295,14 +295,14 @@ sequenceDiagram
   EV-->>P: wake again (closed loop)
 ```
 
-### Process-level information exchange between workers
+### ワーカー間のプロセスレベルの情報交換
 
-In deep exploration, valuable observations (a particular error, a response fragment, a hidden parameter) often arise during one worker's **execution process** without being recorded as a formal fact. To avoid duplicated effort and let later workers build on earlier observations, workers can **search the processes of other workers.**
+深い探索では、価値ある観察（特定のエラー、応答の断片、隠れたパラメータ）が、正式な fact として記録されないまま、ある worker の **実行プロセス** の中で生じることがよくあります。作業の重複を避け、後続の worker が先行の観察の上に積み上げられるよう、worker は **他の worker のプロセスを検索** できます。
 
-- `search_all_worker_traces(q)` — search the execution processes of other workers in the same task by keyword (the worker's own intent steps are excluded automatically). Hits carry an `intent_id`.
-- `list_worker_traces` / `get_worker_trace(intent_id, step_ids=[…])` — first see which workers ran, then pull the full content of specific steps of a given worker to exchange details.
+- `search_all_worker_traces(q)` — 同じタスク内の他の worker の実行プロセスをキーワードで検索します（worker 自身の intent のステップは自動的に除外されます）。ヒットには `intent_id` が付きます。
+- `list_worker_traces` / `get_worker_trace(intent_id, step_ids=[…])` — まずどの worker が走ったかを見てから、ある worker の特定のステップの全内容を引き出して詳細を交換します。
 
-This way, even when there is not yet a corresponding fact in the exploration graph, a later worker reuses observations from another's process. Information flows between workers at the "execution process" level while the boundaries stay intact (each worker still performs only its single assigned intent).
+こうして、探索グラフにまだ対応する fact がないときでも、後続の worker は他者のプロセスから観察を再利用します。情報は「実行プロセス」のレベルで worker 間を流れる一方、境界は保たれたままです（各 worker は依然として、割り当てられた単一の intent だけを実行します）。
 
 ```mermaid
 flowchart LR
@@ -314,12 +314,12 @@ flowchart LR
   ACT ==>|"④ return full process content"| WC
 ```
 
-### The planner's multi-round shared todolist → a stable attack chain
+### planner のマルチラウンド共有 todolist → 安定した攻撃チェーン
 
-A real attack chain is often an ordered sequence of mutually dependent steps (e.g., find an injection point → obtain credentials → lateral movement → privilege escalation), and dispatching them all in parallel at once would tangle them. So the planner holds a **planning todolist that persists per task and is shared across wakes.**
+現実の攻撃チェーンは、しばしば互いに依存する手順の順序付けられた連なりです（例: 注入点を見つける → 認証情報を得る → 横展開 → 権限昇格）。それらを一度にすべて並列で発行すると、絡み合ってしまいます。そこで planner は、**タスクごとに永続化され、起床をまたいで共有されるプランニング todolist** を保持します。
 
-- The planner is event-driven, so it wakes whenever the graph changes, but **each wake is a fresh session.** The shared todolist records the serial attack chain **once** and then, across subsequent rounds, assigns intents **one step at a time in dependency order** (it does not unfold the whole chain ahead of time in a single round).
-- Each round, it assigns an intent only to the next step whose prerequisite is done and whose depended-upon fact already exists, updating the list as it goes (marking fact-satisfied steps complete).
+- planner はイベント駆動なので、グラフが変わるたびに起床しますが、**各起床は新しいセッション** です。共有 todolist は直列の攻撃チェーンを **一度** 記録し、その後のラウンドでは、依存関係の順に **一手ずつ** intent を割り当てます（チェーン全体を単一のラウンドで前倒しに展開することはしません）。
+- 各ラウンドでは、前提条件が完了し、依存する fact がすでに存在する次の手順にのみ intent を割り当て、進みながらリストを更新します（fact が満たされた手順を完了としてマークします）。
 
 ```mermaid
 flowchart TB
@@ -336,77 +336,77 @@ flowchart TB
   R3["round 3 (② yields fact)　dispatch intent ③"] --> T3
 ```
 
-This lets the attack chain progress reliably even in an "event-driven + stateless session" environment — without duplication and without going out of order. This is the core of how ARTEX completes multi-step attack chains autonomously.
+これにより、「イベント駆動 + ステートレスなセッション」という環境でも、重複せず順序を乱さずに、攻撃チェーンが確実に進みます。これが、ARTEX が多段の攻撃チェーンを自律的に完遂する仕組みの中核です。
 
 ---
 
-## Defense and detection material
+## 防御・検知資料
 
-This repository aims to help the **defending side** understand how autonomous AI attacks work and build the capability to detect and block them. It takes the ARTEX behavior seen in the architecture above and turns it around into a **defender's view**, laying out what to observe and where to tighten.
+このリポジトリは、自律型 AI 攻撃がどのように動くのかを **防御側** が理解し、それを検知・遮断する能力を育てる手助けをすることを目指します。上のアーキテクチャで見た ARTEX の挙動を裏返して **防御側の視点** に組み替え、何を観察し、どこを締めるべきかを示します。
 
-- **[Defense & Detection Guide (docs/defense-en.md)](docs/defense-en.md)** (also in [Korean](docs/defense-ko.md))
-  - How autonomous AI attacks differ from traditional scanners, why they are hard to detect, and how to detect them anyway
-  - The fingerprints a defender can observe (IoCs and behavioral signatures) — separated into the target view and the forensic view
-  - The entry points attackers target and the corresponding hardening (auxiliary authentication, IDOR, credential stuffing, sessions and secrets)
-  - WAF/SIEM/authentication-log detection rules (pseudo-rules), a hardening checklist, and an incident-response summary
-  - Korean official channels for indicators of compromise and advisories (KISA, FSI, PIPC) and the reporting duties under Korean law
-- **[Deployable detection rules (detections/)](detections/)** — the guide's fingerprint detections shipped as ready-to-use rules: the host/log/SIEM layer as [Sigma](https://sigmahq.io) rules (atomic + correlation; use `sigma convert` for Splunk, Elasticsearch, and others), and the network layer as [Suricata](https://suricata.io) rules targeting the enrich prober and norma SDK WebFetch User-Agents.
-  - **[ATT&CK coverage layer (detections/attack/)](detections/attack/)**: a [MITRE ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/) layer (JSON) that maps the rules above to the techniques they tag, so you can see at a glance which attack behavior each rule catches. Every technique comes only from a rule's `attack.*` tags, with nothing added by guesswork.
-  - **[Machine-readable indicator list (detections/indicators/)](detections/indicators/)**: the unique fingerprints ARTEX itself emits, gathered into a single CSV (`artex_indicators.csv`) and shipped as a ready-to-import MISP event (`artex_indicators.misp.json`) as well, so you can drop them straight into a SIEM lookup table or a threat-intelligence platform (MISP, or anything that ingests the MISP format) as indicators of compromise (IoCs). Every value is a string verified in the repository source, and each row carries its source file and detection rule.
-  - **[Host triage script (detections/triage/)](detections/triage/)**: a read-only script, [`artex_host_triage.py`](detections/triage/artex_host_triage.py), for the responder standing at a single suspected host's shell with no SIEM or network sensor. It checks the same fingerprints the rules above do, plus — on the box itself — the three host/DB indicators the indicator CSV deliberately carries without a Sigma rule because they are not log- or network-observable (the server listen port, the recording-proxy endpoint, the PostgreSQL exploration schema). It runs on the standard library alone with nothing to install, and every finding is a triage lead carrying the same caveat as its indicator row, never an attribution on its own.
-  - The rules, the layer, the indicators above, and the host-triage script's self-test are all re-run and verified by the repository tests ([detections/tests/](detections/tests/)): a detection rule you cannot run is only a claim.
+- **[防御・検知ガイド (docs/defense-ja.md)](docs/defense-ja.md)**（[English](docs/defense-en.md) · [한국어](docs/defense-ko.md)）
+  - 自律型 AI 攻撃が従来のスキャナとどう違うのか、なぜ検知が難しいのか、それでもどう検知するのか
+  - 防御側が観察できる指紋（IoC と挙動シグネチャ） — 標的側の視点とフォレンジックの視点に分けて
+  - 攻撃者が狙う侵入口と、それに対応するハードニング（補助認証、IDOR、クレデンシャルスタッフィング、セッションとシークレット）
+  - WAF/SIEM/認証ログの検知ルール（疑似ルール）、ハードニングのチェックリスト、インシデント対応の要約
+  - 侵害指標と勧告のための韓国の公的チャネル（KISA、FSI、PIPC）と、韓国法上の報告義務
+- **[デプロイ可能な検知ルール (detections/)](detections/)** — ガイドの指紋検知を、すぐ使えるルールとして同梱したもの: ホスト/ログ/SIEM 層は [Sigma](https://sigmahq.io) ルール（atomic + correlation。Splunk や Elasticsearch などへは `sigma convert` を使用）として、ネットワーク層は enrich プローバと norma SDK の WebFetch の User-Agent を狙った [Suricata](https://suricata.io) ルールとして提供します。
+  - **[ATT&CK カバレッジレイヤー (detections/attack/)](detections/attack/)**: 上記のルールを、それらがタグ付けするテクニックにマッピングした [MITRE ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/) レイヤー（JSON）です。各ルールがどの攻撃挙動を捉えるかを一目で見られます。どのテクニックもルールの `attack.*` タグだけに由来し、推測で足したものは一切ありません。
+  - **[機械可読の指標リスト (detections/indicators/)](detections/indicators/)**: ARTEX 自身が発する固有の指紋を、1 つの CSV（`artex_indicators.csv`）にまとめ、さらにすぐにインポートできる MISP イベント（`artex_indicators.misp.json`）としても提供します。SIEM のルックアップテーブルや脅威インテリジェンスプラットフォーム（MISP、または MISP 形式を取り込める任意のもの）に、侵害指標（IoC）としてそのまま投入できます。どの値もリポジトリのソースで検証した文字列であり、各行は由来のファイルと検知ルールを携えています。
+  - **[ホストトリアージスクリプト (detections/triage/)](detections/triage/)**: SIEM もネットワークセンサーもない、疑わしい単一ホストのシェルの前に立つ対応者のための、読み取り専用スクリプト [`artex_host_triage.py`](detections/triage/artex_host_triage.py) です。上記のルールと同じ指紋を確認し、さらに — そのマシン上で — 指標 CSV が意図的に Sigma ルールなしで携える 3 つのホスト/DB 指標（サーバーのリッスンポート、記録プロキシのエンドポイント、PostgreSQL の探索スキーマ）も確認します。これらはログでもネットワークでも観察できないためです。標準ライブラリだけで動き、インストールするものは何もありません。どの検出結果もトリアージの手がかりであり、その指標行と同じ但し書きを携え、それ自体で帰属を断定するものではありません。
+  - 上記のルール・レイヤー・指標、そしてホストトリアージスクリプトのセルフテストは、すべてリポジトリのテスト（[detections/tests/](detections/tests/)）で再実行・検証されます。実行できない検知ルールは主張にすぎません。
 
-> This material is continually expanded. Suggest additional detection rules or hardening items as issues, and when you send a rule directly, please follow the contract in [the "Contributing detection rules and detection tests" section of the contributing guide](CONTRIBUTING.en.md#contributing-detection-rules-and-detection-tests) (ground every indicator in observable fact, state the limits, pass static validation, and include a reproducible test).
+> この資料は継続的に拡充しています。追加の検知ルールやハードニング項目は issue で提案してください。ルールを直接送る場合は、[貢献ガイドの「検知ルール・検知テストへの貢献」](CONTRIBUTING.md#検知ルール検知テストへの貢献)の取り決めに従ってください（どの指標も観察可能な事実に根拠を置き、限界を述べ、静的検証を通し、再現可能なテストを含めること）。
 
 ---
 
-## Development
+## 開発
 
-Local development and testing:
+ローカルでの開発とテスト:
 
 ```bash
 ./dev.sh    # backend (:8787) + traffic proxy (:8788) + frontend next dev (:5173) → http://localhost:5173
 ```
 
-- Backend: `go run ./cmd/artex` (without `-tags embedui` the frontend is not embedded)
-- Frontend: `cd web && npm run dev` (proxies `/api` to the backend, with hot reload)
-- Tests: `go test ./...`
-- Mock preview (no backend): `cd web && NEXT_PUBLIC_MOCK=1 npm run dev`
+- バックエンド: `go run ./cmd/artex`（`-tags embedui` がないとフロントエンドは埋め込まれません）
+- フロントエンド: `cd web && npm run dev`（`/api` をバックエンドにプロキシし、ホットリロードあり）
+- テスト: `go test ./...`
+- モックプレビュー（バックエンドなし）: `cd web && NEXT_PUBLIC_MOCK=1 npm run dev`
 
-For other development topics (such as manual vulnerability re-verification), see the "开发" (Development) section of [`README.zh.md`](README.zh.md#开发).
+その他の開発トピック（手動での脆弱性の再検証など）については、[`README.zh.md`](README.zh.md#开发) の「开发」（開発）の節を参照してください。
 
-The changes this global edition adds on top of upstream ARTEX are tracked in the [changelog (CHANGELOG.en.md)](CHANGELOG.en.md).
-
----
-
-## License and disclaimer
-
-### Open-source license
-
-This project is distributed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. The full terms are in the [LICENSE](LICENSE) file at the repository root.
-
-Anyone is free to use, modify, and distribute it, but **derivative works must also be released under AGPL-3.0.** In particular, if you modify this project and **provide it to users over a network (e.g., as an online service), you must make the corresponding complete source code available to those users.** This global edition likewise keeps AGPL-3.0.
-
-> ⚠️ **Important:** an open-source license itself does not restrict how the software may be used. The "Usage restrictions" and "Disclaimer" below are an additional covenant and a serious notice that the original author requires of users — please observe them.
-
-### Usage restrictions
-
-- Use this tool to **read and study the source code**, and to **verify its technical principles in a locally isolated environment.**
-- Unless the target is one you own or for which you have **explicit written authorization**, do not scan, probe, exploit, or attack any website, online service, or connected system.
-- Using it for illegal intrusion, data theft, denial of service (DoS), or any other destructive or criminal activity is strictly prohibited.
-- You must comply with all laws on network security, data protection, and computer crime in your country and region (in Korea, the 정보통신망법, 개인정보보호법, and others).
-
-### Disclaimer
-
-This project is provided "AS IS" without any warranty, express or implied. The original author and contributors are not liable for any direct or indirect damage, data loss, system damage, or legal dispute arising from the use of this tool (regardless of whether it was used appropriately). **Downloading, installing, or using this project is deemed to constitute your having read, understood, and agreed to all of the above conditions.**
-
-**All legal responsibility and consequences rest with the user.**
+このグローバル版が上流の ARTEX に加えた変更は、[変更履歴 (CHANGELOG.md)](CHANGELOG.md) に記録されています。英語版は [CHANGELOG.en.md](CHANGELOG.en.md)、韓国語版は [CHANGELOG.ko.md](CHANGELOG.ko.md) です。
 
 ---
 
-## Upstream project
+## ライセンスと免責事項
 
-- Upstream repository: [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) (currently unreachable, checked 2026-10)
-- Original README (Chinese): [README.zh.md](README.zh.md)
-- Original online demo (Chinese UI): [https://artex-demo.vercel.app/](https://artex-demo.vercel.app/) (currently unreachable, checked 2026-10)
-- Agent SDK: [Autumn-27/norma](https://github.com/Autumn-27/norma) (currently unreachable, checked 2026-10)
+### オープンソースライセンス
+
+このプロジェクトは **GNU Affero General Public License v3.0（AGPL-3.0）** の下で配布されます。完全な条項はリポジトリのルートにある [LICENSE](LICENSE) ファイルにあります。
+
+誰でも自由に利用・改変・配布できますが、**派生物も AGPL-3.0 の下で公開しなければなりません。** 特に、このプロジェクトを改変して **ネットワーク越しにユーザーに提供する場合（例えばオンラインサービスとして）、対応する完全なソースコードをそれらのユーザーに利用可能にしなければなりません。** このグローバル版も同様に AGPL-3.0 を維持します。
+
+> ⚠️ **重要:** オープンソースライセンスそれ自体は、ソフトウェアの利用方法を制限するものではありません。下記の「利用制限」と「免責事項」は、原作者がユーザーに求める追加の取り決めであり、重大な告知です — 必ず守ってください。
+
+### 利用制限
+
+- このツールは、**ソースコードを読んで学ぶため**、および **ローカルに隔離された環境でその技術的原理を検証するため** に使ってください。
+- 標的が自分の所有物であるか、**明示的な書面による許可** を得ている場合を除き、いかなるウェブサイト・オンラインサービス・接続されたシステムもスキャン・探査・エクスプロイト・攻撃しないでください。
+- 不正侵入、データ窃取、サービス妨害（DoS）、その他いかなる破壊的・犯罪的行為への利用も固く禁じます。
+- 自分の国と地域における、ネットワークセキュリティ・データ保護・コンピュータ犯罪に関するすべての法律（韓国では정보통신망법、개인정보보호법など）を遵守しなければなりません。
+
+### 免責事項
+
+このプロジェクトは、明示・黙示を問わずいかなる保証もなく「現状のまま」（AS IS）提供されます。原作者とコントリビューターは、このツールの利用（適切に使われたか否かを問わず）から生じるいかなる直接的・間接的な損害、データの損失、システムの損傷、法的紛争についても責任を負いません。**このプロジェクトをダウンロード・インストール・利用することは、上記のすべての条件を読み、理解し、同意したものとみなされます。**
+
+**すべての法的責任と結果は利用者が負います。**
+
+---
+
+## 上流プロジェクト
+
+- 上流リポジトリ: [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX)（現在アクセス不可、2026-10 確認）
+- オリジナル README（中国語）: [README.zh.md](README.zh.md)
+- オリジナルのオンラインデモ（中国語 UI）: [https://artex-demo.vercel.app/](https://artex-demo.vercel.app/)（現在アクセス不可、2026-10 確認）
+- エージェント SDK: [Autumn-27/norma](https://github.com/Autumn-27/norma)（現在アクセス不可、2026-10 確認）

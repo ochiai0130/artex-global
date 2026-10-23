@@ -1,248 +1,103 @@
-# ARTEX detection rules
+# ARTEX 検知ルール
 
-English · [한국어](README.ko.md)
+日本語 · [English](README.en.md) · [한국어](README.ko.md)
 
-> 한국어: 이 디렉터리는 [방어·탐지 가이드(docs/defense-ko.md)](../docs/defense-ko.md)의 4절 "탐지 규칙"을
-> 실제로 배포 가능한 [Sigma](https://sigmahq.io) 규칙으로 옮긴 것입니다. 모든 규칙은 자신이 소유하거나 서면
-> 허가를 받은 시스템을 지키는 **방어·탐지 목적에만** 사용하십시오. 한국어 전체 문서는
-> **[detections/README.ko.md](README.ko.md)** 를 보십시오.
+防御・検知ガイド（[日本語](../docs/defense-ja.md) · [English](../docs/defense-en.md) · [한국어](../docs/defense-ko.md)、第 4 節）の疑似ルールを、各自の SIEM や EDR のクエリ言語へ変換して配備できる、ベンダー中立の [Sigma](https://sigmahq.io) 形式にしたものです。ここにある指標はすべて、推測ではなく、このリポジトリのソースで確認した文字列または挙動に根拠を置いています。すべてのルールは、自分が所有する、または書面による許可を得たシステムを守る**防御・検知の目的にのみ**使用してください。
 
-Deployable [Sigma](https://sigmahq.io) rules that formalize the pseudo-rules in the defense guide
-([Korean](../docs/defense-ko.md) · [English](../docs/defense-en.md), section 4) into a vendor-neutral
-format you can convert to your own SIEM or EDR query language. Every indicator here is grounded in a
-string or behaviour verified in this repository's source, not inferred.
+## アトミックルール
 
-## Atomic rules
+- **`sigma/artex_enrich_user_agent.yml`** — ARTEX の資産エンリッチメント（`enrich/enrich.go`）が送る、インバウンドの `artex-enrich/1.0` User-Agent です。標的側で観察する補助指標です。`level: high`。
+- **`sigma/artex_selfupdate_egress.yml`** — 自己更新ルーチン（`selfupdate/github.go`）が外へ送る `artex-selfupdate` User-Agent です。ホスト／フォレンジックの egress 指標です。`level: medium`。
+- **`sigma/artex_guard_audit_framing.yml`** — ツール呼び出しがブロックされたとき、監査ログへ書き込まれるプラットフォームガードの制御マーカー（`guard/guard.go`）です。ホスト／フォレンジック指標です。`level: high`。
+- **`sigma/destructive_command_hunting.yml`** — ARTEX ガードの組み込み拒否リスト（`db/db.go` のシード）を反映した、破壊的なシェル／DB コマンドです。ARTEX 固有のシグネチャではなく、汎用のハンティングの手がかりです。`level: medium`。
+- **`sigma/artex_recording_proxy_ca.yml`** — 記録プロキシが `_ca/mitmproxy-ca-cert.pem` という配置で作る MITM CA ファイル（`traffic/traffic.go`）です。ホスト／フォレンジックのアーティファクトであり、ファイル名そのものは単独の mitmproxy と共有されるため、ハンティングの手がかりとして扱います。`level: medium`。
 
-- **`sigma/artex_enrich_user_agent.yml`** — inbound `artex-enrich/1.0` User-Agent from ARTEX asset
-  enrichment (`enrich/enrich.go`). Target-side, supporting indicator. `level: high`.
-- **`sigma/artex_selfupdate_egress.yml`** — outbound `artex-selfupdate` User-Agent from the self-update
-  routine (`selfupdate/github.go`). Host/forensic egress indicator. `level: medium`.
-- **`sigma/artex_guard_audit_framing.yml`** — the platform-guard control marker written to the audit log
-  on a blocked tool call (`guard/guard.go`). Host/forensic indicator. `level: high`.
-- **`sigma/destructive_command_hunting.yml`** — destructive shell/DB commands mirroring the ARTEX guard's
-  built-in deny list (`db/db.go` seed). Generic hunting lead, not an ARTEX signature. `level: medium`.
-- **`sigma/artex_recording_proxy_ca.yml`** — creation of the recording proxy's MITM CA file under the
-  `_ca/mitmproxy-ca-cert.pem` layout (`traffic/traffic.go`). Host/forensic artifact; the bare filename is
-  shared with standalone mitmproxy, so it is a hunting lead. `level: medium`.
+## 相関ルール（挙動）
 
-## Correlation rules (behaviour)
+静的な文字列は変更できますが、挙動は隠すのがより困難です。[`sigma/correlation/`](sigma/correlation/) にある Sigma の**相関**ルールは、防御・検知ガイド（第 4.1〜4.2 節および第 4.4 節）の挙動ベースの層を表しています。各ルールは上のアトミックルールを `id` で参照するため、参照を解決するには相関ファイル 1 つではなく `sigma/` ツリー全体を変換してください（下記を参照）。
 
-Static strings can be changed; behaviour is harder to hide. These Sigma **correlation** rules in
-[`sigma/correlation/`](sigma/correlation/) encode the behaviour-based layer of the defense guide
-(sections 4.1–4.2 and 4.4). Each references an atomic rule above by its `id`, so convert the whole
-`sigma/` tree — not a single correlation file — to resolve the reference (see below).
+- **`sigma/correlation/artex_enrich_scan_velocity.yml`** — 1 つの送信元が短い時間窓の中で `artex-enrich/1.0` のプローブをまとめて送る場合です（エンリッチメントは並行度 4 で、レート制限なしに動きます）。単発ルールが見落とす速度を捉えます。`event_count`、`level: high`。
+- **`sigma/correlation/artex_enrich_fanout.yml`** — 1 つの送信元がエンリッチメントの User-Agent を、互いに*異なる*多数のホストへ運ぶ場合です。資産リストを機械の速度で横断するファンアウトであり、量だけではなく幅が手がかりになります。`value_count`、`level: high`。
+- **`sigma/correlation/artex_guard_block_burst.yml`** — 1 台のホストでプラットフォームガードの制御マーカーが繰り返し記録される場合です。マーカーを引用した文書ではなく、稼働中の ARTEX が自分のガードに引っかかっている状態です。`event_count`、`level: high`。
+- **`sigma/correlation/artex_guard_marker_then_destructive.yml`** — 1 台のホストで、時間窓の中にガードマーカーと破壊的コマンドが同時に現れる場合です（防御・検知ガイド §4.2、多段階）。ARTEX 固有のマーカーを、それだけでは汎用の破壊的コマンド信号と組み合わせることで、特異度を上げます。`temporal`、`level: high`。
 
-- **`sigma/correlation/artex_enrich_scan_velocity.yml`** — a burst of `artex-enrich/1.0` probes from one
-  source in a short window (enrichment runs at concurrency 4 with no rate limit). The velocity the
-  single-request rule misses. `event_count`, `level: high`.
-- **`sigma/correlation/artex_enrich_fanout.yml`** — one source carrying the enrichment User-Agent to many
-  *distinct* hosts: machine-speed fan-out across an asset list, where breadth (not just volume) is the
-  tell. `value_count`, `level: high`.
-- **`sigma/correlation/artex_guard_block_burst.yml`** — repeated platform-guard control markers on one
-  host, i.e. an active ARTEX run tripping its guard rather than a document that merely quotes the marker.
-  `event_count`, `level: high`.
-- **`sigma/correlation/artex_guard_marker_then_destructive.yml`** — the guard marker and a destructive
-  command co-occurring on one host within a window (defense guide §4.2, multi-stage). Combining an
-  ARTEX-specific marker with the otherwise-generic destructive-command signal raises specificity.
-  `temporal`, `level: high`.
+閾値と時間窓は保守的な既定値です。各自のベースラインに合わせて調整してください。§4.2 の純粋な Web 多段階（列挙 → プローブ → 認証）は、そのパターンが単一の ARTEX 固有 User-Agent に還元されないため、依然として環境固有のベースルールが必要です。出発点になる汎用の挙動ベース Sigma テンプレートは [防御・検知ガイド §4.2](../docs/defense-ja.md)（[English](../docs/defense-en.md#42-siem-correlation-rules) · [한국어](../docs/defense-ko.md#42-siem-상관-규칙)）にあります。ARTEX のソースに根拠を置けないため、このテスト対象のルールツリーには入れていません。
 
-Thresholds and windows are conservative defaults — tune them to your baseline. The pure web multi-stage
-case in §4.2 (enumerate → probe → authenticate) still needs base rules specific to your environment,
-because that pattern does not reduce to a single ARTEX-unique User-Agent. A generic behavioral Sigma base
-template to start from is provided in [defense guide §4.2](../docs/defense-en.md#42-siem-correlation-rules);
-it is kept out of this tested rule tree because it cannot be grounded in ARTEX source.
+## ネットワークルール（Suricata）
 
-## Network rules (Suricata)
+Sigma が扱うのはホストとログのテレメトリです。回線上で観察できる ARTEX の User-Agent は 2 つあり、どちらも [`suricata/`](suricata/) に [Suricata](https://suricata.io) ルールとして入っています。エンリッチメントプローバの `artex-enrich/1.0`（`enrich/enrich.go`）には存在シグネチャと高速列挙のバリアント（sid 1000001〜1000002）があり、norma SDK の WebFetch ツールが攻撃段階で送る `norma/0.4`（`github.com/Autumn-27/norma/tool/webfetch.go`）には存在シグネチャ（sid 1000003）があります。その他の worker ツール（Bash で動かす `curl` や `nmap`）は各自の User-Agent を使い、ARTEX 固有の指紋を持たないため、ネットワーク層は意図的にこの 2 つの UA に絞っています。範囲、TLS の注意、`suricata -T` と参照 pcap による検証方法は [`suricata/README.md`](suricata/README.md) を参照してください。
 
-Sigma covers host and log telemetry. The two ARTEX User-Agents observable on the wire both ship as
-[Suricata](https://suricata.io) rules in [`suricata/`](suricata/): the enrichment prober's `artex-enrich/1.0`
-(`enrich/enrich.go`) with a presence signature plus a high-rate enumeration variant (sid 1000001–1000002),
-and the norma SDK WebFetch tool's attack-phase `norma/0.4` (`github.com/Autumn-27/norma/tool/webfetch.go`) with a presence signature
-(sid 1000003). Other worker tools (Bash-run `curl`, `nmap`) use their own User-Agents and carry no
-ARTEX-unique fingerprint, so the network layer is intentionally narrow to these two UAs; see
-[`suricata/README.md`](suricata/README.md) for the scope, the TLS caveat, and how to validate with
-`suricata -T` and a reference pcap.
+## ATT&CK カバレッジ
 
-## ATT&CK coverage
+これらのルールがタグ付けするテクニックは、[MITRE ATT&CK](https://attack.mitre.org/) の Navigator レイヤー [`attack/artex_navigator_layer.json`](attack/) にまとめてあります。6 つのタクティク（偵察、コマンドアンドコントロール、実行、影響、認証情報アクセス、収集）にまたがる 8 つのテクニックで、それぞれルールの `attack.*` タグに根拠を置き、検知強度（ARTEX 固有のシグネチャか、汎用のハンティングの手がかりか）でスコアを付けています。[ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/) で開くと、どのルールがどの ARTEX の挙動を覆うかが見えます。スコアの付け方、テクニックとルールの対応、そして誠実な範囲（カバレッジは網羅ではありません）は [`attack/README.md`](attack/README.md) を参照してください。[一貫性テスト](tests/attack/run.sh) が、レイヤーとルールセットのずれを防ぎます。
 
-The techniques these rules tag are collected into a [MITRE ATT&CK](https://attack.mitre.org/) Navigator
-layer in [`attack/artex_navigator_layer.json`](attack/) — eight techniques across six tactics
-(Reconnaissance, Command and Control, Execution, Impact, Credential Access, Collection), each grounded in a rule's `attack.*` tags and
-scored by detection strength (ARTEX-specific signature vs. generic hunting lead). Open it in the
-[ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/) to see which ARTEX behaviour each
-rule covers; see [`attack/README.md`](attack/README.md) for the scoring, the technique-to-rule map, and
-the honest scope (coverage is not completeness). A [consistency test](tests/attack/run.sh) keeps the layer
-from drifting away from the rule set.
+## 指標リスト（機械可読）
 
-## Indicator list (machine-readable)
+検知ロジックではなくアトミックな指標そのものが欲しい防御者のために、[`indicators/artex_indicators.csv`](indicators/) は ARTEX が発する固有の指紋を 1 つの CSV に集めています。脅威インテリジェンスプラットフォーム、SIEM のルックアップ、ホストトリアージのチェックリストへそのまま入れられるように、エンリッチメントと自己更新の User-Agent、ガードの監査マーカー、サーバー／プロキシの既定エンドポイント、記録プロキシの CA 証明書、PostgreSQL の探索グラフのスキーマ指紋を載せ、各行には根拠となったソースファイルと、その上に組んだルール（あれば）を記録しています。同じ指標は、すぐにインポートできる [MISP](https://www.misp-project.org/) イベント（[`indicators/artex_indicators.misp.json`](indicators/)）としても提供します。MISP を運用している（またはそこから STIX へエクスポートする）防御者は、CSV の列を手で対応付ける必要がありません。ルールに裏付けられた指紋は `to_ids` とし、ホストフォレンジック用のポートとスキーマ指紋はそうしていません。汎用のハンティングの手がかり（破壊的コマンド）と、norma SDK が共有する `norma/0.4` の WebFetch User-Agent（Suricata の sid 1000003 が捉える回線上のシグネチャであり、ARTEX 固有の文字列ではありません）は、誤検知を避けるためインポート用リストから意図的に外しています。列の構成、MISP のタイプ対応、誠実な注意、そして CSV と MISP イベントの両方のドリフトを防ぐ一貫性テストは [`indicators/README.md`](indicators/README.md) を参照してください。
 
-For defenders who want the atomic indicators rather than the detection logic,
-[`indicators/artex_indicators.csv`](indicators/) collects the unique fingerprints ARTEX emits into one
-CSV to drop into a threat-intelligence platform, a SIEM lookup, or a host-triage checklist — the enrichment
-and self-update User-Agents, the guard audit marker, the server/proxy default endpoints, the recording-proxy
-CA certificate, and the PostgreSQL exploration-graph schema fingerprint — each row recording the source file
-it is grounded in and the rule (if any) built on it. The same indicators ship as a
-ready-to-import [MISP](https://www.misp-project.org/) event
-([`indicators/artex_indicators.misp.json`](indicators/)), so a defender running MISP (or exporting on to
-STIX from it) does not have to map the CSV columns by hand — the rule-backed fingerprints are flagged
-`to_ids`, the host-forensic ports and schema fingerprint are not. Generic hunting leads (the
-destructive commands) and the norma SDK's shared `norma/0.4` WebFetch User-Agent — a wire signature carried
-by Suricata sid 1000003, not an ARTEX-unique string — are deliberately kept out of the import-ready list to
-avoid false positives; see
-[`indicators/README.md`](indicators/README.md) for the columns, the MISP type mapping, the honest caveats,
-and the consistency test that keeps both the CSV and the MISP event from drifting.
+## ホストトリアージ
 
-## Host triage
+上のルールは、SIEM、ネットワークセンサー、または脅威インテリジェンスプラットフォームを持つ防御者のためのものです。もう一方の対応者、つまり SIEM がなく、疑わしいホスト 1 台のシェルの前にいる人のために、[`triage/artex_host_triage.py`](triage/) があります。ローカルの状態から「ここで ARTEX は動いたか」に答える読み取り専用スクリプトです。同じ指紋を運用し、**さらに CSV が意図的に Sigma ルールなしで載せている 3 つのホスト／DB 指標**（サーバーの待受ポート、記録プロキシのエンドポイント、PostgreSQL の探索スキーマ）も確認します。これらはログやネットワークでは観察できず、そのマシン上でしか確認できません。記録機能が子プロセスへ注入する環境変数、つまり実行中プロセスがプロキシ変数と mitmproxy の CA 信頼変数を同時に持っているか（`agent/worker.go`）も、`/proc` または `--proc-from` のダンプから検出します。どの検出も、対応する指標行と同じ但し書きを携えたトリアージの手がかりです。[`triage/README.md`](triage/README.md) を参照してください。組み込みの `--self-test` がマージゲートとして動きます（下記）。
 
-The rules above serve defenders with a SIEM, a network sensor, or a threat-intel platform. For the other
-responder — the one at a single suspected host's shell, with no SIEM — [`triage/artex_host_triage.py`](triage/)
-is a read-only script that answers "did ARTEX run here?" from local state. It operationalizes the same
-fingerprints, **plus the three host/DB indicators the CSV deliberately carries without a Sigma rule**
-(the server listen port, the recording-proxy endpoint, and the PostgreSQL exploration schema),
-which are not log- or network-observable and can only be checked on the box. It also flags the recorder's
-subprocess env-injection — a running process carrying a proxy var together with a mitmproxy CA-trust var
-(`agent/worker.go`), read from `/proc` or a `--proc-from` dump. Every finding is a triage lead carrying the
-same caveat as its indicator row. See [`triage/README.md`](triage/README.md); a built-in `--self-test`
-runs as a merge-gate (below).
+## テスト
 
-## Tests
+ルールには、Docker だけあれば再現できるテストが [`tests/`](tests/) に同梱されています。
 
-The rules ship with reproducible tests in [`tests/`](tests/), each needing only Docker:
+- **Suricata**（[`tests/suricata/run.sh`](tests/suricata/run.sh)）は、まずルールファイル全体が `suricata -T --init-errors-fatal` で読み込めることを検証します（どのキャプチャもそのルールを通らなくても、パース失敗は捕捉されます）。次に scapy で決定的なキャプチャを合成し、その上で `suricata -r` を実行して、存在ルールがプローブごとに 1 回発火すること、速度ルールがレート閾値を超えると発火すること、良性の User-Agent のキャプチャではアラートが 0 であることをアサートします。バイナリのキャプチャはコミットせず、実行のたびに再生成します。
+- **Sigma**（[`tests/sigma/run.sh`](tests/sigma/run.sh)）は、下記の `sigma check` と `sigma convert` の検証を実行可能なテストとして走らせます。エラー 0 であること、ツリー全体がバックエンドのクエリへコンパイルされること、各アトミック指標の文字列がそのクエリまで残ること、相関ルールは単体では変換に失敗することをアサートします。最後のアサートは、相関ルールが参照するアトミックルールに本当に依存していることの証明です。
+- **Sigma のライブイベント照合**（[`tests/sigma_match/run.sh`](tests/sigma_match/run.sh)）は、上の Sigma スイートを妥当性とコンパイルから、アトミックルールと相関ルールの両方について実際の発火まで広げます。各アトミックルールについて、代表的な悪意のあるサンプルイベントが一致し、良性のイベントは一致しないことをアサートします（たとえば `.mitmproxy/` 配下の単独 CA ファイルは、`|all` が `_ca/` ディレクトリも要求する記録プロキシのルールには引っかかりません）。各相関ルールについては、陽性のタイムライン（1 つのグループが時間窓の中で閾値を満たす）が発火し、陰性のもの（閾値未満、ウィンドウ超過、グループ分割、レグ欠落）は静かなままであることをアサートします。パースはすべて pySigma が行い、テストはコンパイルされた条件ツリーと集約仕様を歩くだけです。参照ルールへどのイベントを渡すかは、同じアトミックなマッチャで決めます。「実行できない検知は主張にすぎない」を、Suricata と同じように Sigma 側へ適用します。
+- **ATT&CK レイヤー**（[`tests/attack/run.sh`](tests/attack/run.sh)）は、ATT&CK カバレッジレイヤーがルールと整合していることを確認します。スコアを付けたテクニックとタクティクは、ルールセットの `attack.*` タグと正確に一致しなければならず、各テクニックは実在するルールファイルを名指ししなければなりません。レイヤーを更新せずにルールを追加する（またはその逆）と、テストは失敗します。
+- **指標の根拠（source-of-truth）**（[`tests/indicators/run.sh`](tests/indicators/run.sh)）は、各ルールが固定した指標が、上流ソースが今も発している文字列であることを確認します。`enrich/enrich.go` の `artex-enrich/1.0`、`selfupdate/` の `artex-selfupdate`、`guard/guard.go` のガードマーカー、`db/db.go` の破壊的トークンが、ルールにもまだ固定されているかを見ます。他の 3 つが見落とすドリフト、つまりすべてのルールがコンパイルも発火もしているあいだに上流の再同期が User-Agent やマーカーを変えてしまう場合を捕捉します。同じテストは機械可読の [`indicators/artex_indicators.csv`](indicators/artex_indicators.csv) を読み直し、公開された各行が今もそのソースとルールに根拠を置いていることをアサートするので、防御者がインポートする成果物もずれません。最後に、読み取る上流ソースがすべて CI ワークフローの `push` と `pull_request` のパスフィルタに載っていることをアサートし、新しく固定したソースだけを触る PR がテストを飛ばして、そのドリフトをマージゲートに通さないようにします。これにより、上で述べた「推測ではなく、このリポジトリのソースで確認した文字列に根拠を置く」は約束ではなくガードになります。
+- **MISP エクスポートの一貫性**（[`tests/misp/run.sh`](tests/misp/run.sh)）は、MISP イベント（[`indicators/artex_indicators.misp.json`](indicators/artex_indicators.misp.json)）が妥当な MISP 文書であることを証明します。[pymisp](https://github.com/MISP/PyMISP) で読み込まれ、そのオブジェクトモデルは実在しない属性タイプを拒否するため、成果物は MISP らしく見えるだけではなく、本当にインポートできます。また、上の CSV と行単位で同期していることもアサートします。同じ値、指標ごとに意図した MISP のタイプ／カテゴリ、そして CSV の誠実さに対応する `to_ids`／`disable_correlation` フラグ（ルールに裏付けがある = 対処可能なので `to_ids` は on、ホストフォレンジックのポート = トリアージのヒントなので `to_ids` は off で相関は無効）が一致しなければなりません。イベントは CSV と並べて手で保守します。CSV にはない整理済みのコメント、UUID、タグを持つため、CSV の行を追加・削除・タイプ変更するときは同じコミットで MISP イベントも更新し、両者が一致するまでこのテストは失敗します。
+- **Sigma バックエンドの移植性**（[`tests/sigma_backends/run.sh`](tests/sigma_backends/run.sh)）は、ルールが Splunk の例 1 つを超えて変換できることを証明します。ツリー全体（アトミック + 相関）が Splunk、Elasticsearch の `eql` ターゲット、Grafana Loki でコンパイルされ、5 つのアトミックルールは Sigma の相関をサポートしないバックエンド（Elasticsearch の `lucene`、Microsoft の `kusto` バックエンド）でもコンパイルされます。下記の[検証と変換](#検証と変換)にあるバックエンドごとの対応表を、再実行できる検査で裏付けます。
+- **SigmaHQ 規約のリント**（[`tests/sigma_lint/run.sh`](tests/sigma_lint/run.sh)）は、SigmaHQ のバリデータ一式（`pySigma-validators-sigmahq` プラグイン。素の `sigma check` はこれを読み込みません）を、[`tests/sigma_lint/validators.yml`](tests/sigma_lint/validators.yml) に文書化したベースラインに対して実行し、issues が 0 であることをアサートします。一式が実際に動いたこと、意図的に除外して文書化した 4 つの検査だけが残っていることも確認するので、ルールが新しい規約上の問題（大文字小文字の誤ったタイトル、タクソノミから外れたフィールド）を 1 つでも拾うとビルドは失敗します。
 
-- **Suricata** ([`tests/suricata/run.sh`](tests/suricata/run.sh)) first validates that the whole rules file
-  loads under `suricata -T --init-errors-fatal` (a rule that fails to parse is caught even if no capture
-  exercises it), then synthesizes a deterministic capture with scapy, runs `suricata -r` over it, and asserts
-  that the presence rule fires once per probe, the velocity rule trips past its rate threshold, and a
-  benign-User-Agent capture produces zero alerts. No binary capture is committed — the test regenerates it on
-  every run.
-- **Sigma** ([`tests/sigma/run.sh`](tests/sigma/run.sh)) runs the `sigma check` and `sigma convert` validation
-  below as an executable test: it asserts 0 errors, that the whole tree compiles to a backend query, that each
-  atomic indicator string survives into that query, and that a correlation rule fails to convert on its own —
-  proving it genuinely depends on the atomic rule it references.
-- **Sigma live event-matching** ([`tests/sigma_match/run.sh`](tests/sigma_match/run.sh)) extends the Sigma suite
-  above from validity/compilation to actual firing, for both the atomic and the correlation rules: for every
-  atomic rule it asserts a representative malicious sample event matches and a benign one does not (for example,
-  a standalone CA file under `.mitmproxy/` does not trip the recording-proxy rule, whose `|all` also requires the
-  `_ca/` directory); for every correlation rule it asserts a positive timeline fires (threshold met inside the
-  window within one group) and negative ones stay quiet (below threshold, window exceeded, split group, or a
-  missing leg). pySigma does all parsing; the test only walks the compiled condition tree and aggregation spec,
-  deciding which events feed a referenced rule with the same atomic matcher. It brings "a detection you cannot
-  run is only a claim" to the Sigma side the way Suricata has it.
-- **ATT&CK layer** ([`tests/attack/run.sh`](tests/attack/run.sh)) checks that the ATT&CK coverage layer stays
-  consistent with the rules: its scored techniques and tactics must be exactly the `attack.*` tags on the
-  rule set, and each technique must name a rule file that exists. Adding a rule without updating the layer
-  (or vice versa) fails the test.
-- **Indicator source-of-truth** ([`tests/indicators/run.sh`](tests/indicators/run.sh)) checks that each rule's
-  pinned indicator is still the string the upstream source emits — `artex-enrich/1.0` in `enrich/enrich.go`,
-  `artex-selfupdate` in `selfupdate/`, the guard marker in `guard/guard.go`, the destructive tokens in
-  `db/db.go` — and is still pinned in the rule. It catches the drift the other three miss: an upstream re-sync
-  that changes a User-Agent or marker while every rule still compiles and fires. The same test re-reads the
-  machine-readable [`indicators/artex_indicators.csv`](indicators/artex_indicators.csv) and asserts every
-  published row is still grounded in its source and rule, so the artifact a defender imports cannot drift
-  either. Finally it asserts that every upstream source it reads is listed in the CI workflow's `push` and
-  `pull_request` paths filter, so a PR touching only a newly pinned source cannot skip the test and let that
-  drift pass the merge gate. This makes "grounded in a string verified in this repository's source, not
-  inferred" (above) a guard, not a promise.
-- **MISP export consistency** ([`tests/misp/run.sh`](tests/misp/run.sh)) proves the MISP event
-  ([`indicators/artex_indicators.misp.json`](indicators/artex_indicators.misp.json)) is a valid MISP document —
-  it loads under [pymisp](https://github.com/MISP/PyMISP), whose object model rejects any attribute type that
-  is not a real MISP type, so the artifact really imports rather than merely looking like MISP — and that it
-  stays row-for-row in sync with the CSV above: same values, the intended MISP type/category per indicator,
-  and a `to_ids`/`disable_correlation` flag that mirrors the CSV's honesty (rule-backed = actionable, so
-  `to_ids` on; host-forensic port = triage hint, so `to_ids` off and correlation disabled). The event is
-  hand-maintained alongside the CSV — it carries curated comments, UUIDs, and tags the CSV does not — so
-  when you add, remove, or retype a CSV row you update the MISP event in the same commit, and this test
-  fails until the two agree.
-- **Sigma backend portability** ([`tests/sigma_backends/run.sh`](tests/sigma_backends/run.sh)) proves the rules
-  convert beyond the single Splunk example: the whole tree (atomic + correlation) compiles on Splunk, the
-  Elasticsearch `eql` target, and Grafana Loki, and the five atomic rules still compile on backends that do not
-  support Sigma correlations (Elasticsearch `lucene`, the Microsoft `kusto` backend). It backs the per-backend
-  support matrix in [Validate and convert](#validate-and-convert) below with a re-runnable check.
-- **SigmaHQ convention lint** ([`tests/sigma_lint/run.sh`](tests/sigma_lint/run.sh)) runs the full SigmaHQ
-  validator set (the `pySigma-validators-sigmahq` plugin, which plain `sigma check` does not load) against the
-  documented baseline in [`tests/sigma_lint/validators.yml`](tests/sigma_lint/validators.yml) and asserts 0
-  issues. It also checks that the full set actually ran and that only four deliberately excluded, documented
-  checks remain, so a rule that picks up a new convention issue (a mis-cased title, an off-taxonomy field)
-  fails the build.
+8 つのルールスイートと並べて、スイートではない 3 つのゲートが同じ CI ワークフローと [`tests/run-all.sh`](tests/run-all.sh) で動きます。ハーネス同期の検査（`run-all.sh`、CI、スイートディレクトリが同じスイートを同じ順序で名指ししていること）、[ホストトリアージツール](triage/) の `--self-test`（[`tests/triage-selftest.sh`](tests/triage-selftest.sh)。合成ホストを作り、すべてのトリアージ検査がそこで発火し、きれいなホストでは検出が 0 であることをアサートします）、そして防御テンプレートの整合検査（[`tests/check-defense-template.sh`](tests/check-defense-template.sh)）です。後者は、防御・検知ガイドがインラインの Sigma 相関テンプレートについて述べている事実を再実行します。`sigma check` が通り、splunk／eql／loki で変換でき、lucene と kusto は相関を拒否し、韓国語版と英語版のルール本体がバイト単位で同一であることです。そのテンプレートはルールツリーの外の散文として存在し、上流の sigma-cli に対して古くなっても、どのスイートも拾わないためです。
 
-Alongside the eight rule suites, three non-suite gates run in the same CI workflow and in
-[`tests/run-all.sh`](tests/run-all.sh): a harness-sync check (that `run-all.sh`, CI, and the suite
-directories name the same suites in the same order); the [host-triage tool](triage/)'s `--self-test`
-([`tests/triage-selftest.sh`](tests/triage-selftest.sh)), which builds a synthetic host and asserts every
-triage check fires on it while a clean host produces zero findings; and a defense-template consistency
-check ([`tests/check-defense-template.sh`](tests/check-defense-template.sh)) that re-runs the facts the
-defense guide states about its inline Sigma correlation template — `sigma check` passes, it converts on
-splunk/eql/loki, lucene and kusto reject the correlation, and the Korean and English copies carry a
-byte-identical rule body — since that template lives as prose outside this rule tree and no suite would
-otherwise catch it going stale against an upstream sigma-cli.
+各スクリプトは、アサートが 1 つでも失敗すると 0 以外で終了します。[`tests/README.md`](tests/README.md) を参照してください。
 
-Each script exits non-zero on any failed assertion. See [`tests/README.md`](tests/README.md).
+## これらのルールを誠実に読む
 
-## How to read these honestly
+- **静的指標は変更できます。** 運用者は別の User-Agent を設定できるため、`artex-enrich/1.0` や `artex-selfupdate` が**ないことは、安全を意味しません。** 持続するシグナルは*挙動*です。1 つの送信元が偵察 → 列挙 → プロービング → 認証／インジェクションの試行をつなぎ、応答に適応し、休まず動くことです。その層は防御・検知ガイド（第 1 節、第 2 節、第 4.1〜4.2 節）で説明しており、上の `sigma/correlation/` ルールが配備可能な相関（速度、ファンアウト、ガードブロックのバースト、ガードマーカーと破壊的コマンドの多段階）として提供します。純粋な Web の多段階は、依然として環境固有のベースルールが必要です。
+- **破壊的コマンドのルールは汎用ハンティングです。** ARTEX のガード拒否リストを反映していますが、同じコマンドは正当な管理者が実行します。ヒットは手がかりとして扱い、環境に許可リストを置き、それだけで ARTEX に帰属させないでください。
+- **ポート指標は Sigma ではなくホストフォレンジックです。** ARTEX サーバーの既定 `:8787` と記録プロキシ `127.0.0.1:8788`（`cmd/artex/main.go`）は、疑わしいホストで `ss`／`netstat` を使って確認するのが適切です。ノイズの多いネットワークルールとしては載せず、防御・検知ガイドに文書化し、トリアージ用に[指標 CSV](indicators/) へ載せています。[ホストトリアージスクリプト](triage/) は、まさにそのホストローカルの確認（ポート、記録プロキシのアーティファクト、ログマーカー、PostgreSQL スキーマ）を、シェルには入れるが SIEM はない対応者のために実行します。
 
-- **Static indicators can be changed.** An operator can set a different User-Agent, so the absence of
-  `artex-enrich/1.0` or `artex-selfupdate` does **not** mean safety. The durable signal is *behaviour* —
-  a single source chaining recon → enumeration → probing → auth/injection attempts, adapting to responses,
-  running without pause. That layer is described in the defense guide (sections 1, 2, and 4.1–4.2); the
-  `sigma/correlation/` rules above ship it as deployable correlations (velocity, fan-out, guard-block
-  burst, and a guard-marker-with-destructive-command multi-stage), and the pure web multi-stage case
-  still needs base rules specific to your environment.
-- **The destructive-command rule is generic hunting.** It mirrors ARTEX's guard deny list, but the same
-  commands are run by legitimate administrators. Treat a hit as a lead, allow-list your environment, and
-  do not attribute it to ARTEX on its own.
-- **Port indicators are host-forensic, not Sigma.** The ARTEX server default `:8787` and the recording
-  proxy `127.0.0.1:8788` (`cmd/artex/main.go`) are best checked on a suspected host with `ss`/`netstat`,
-  so they are documented in the defense guide and listed in the [indicator CSV](indicators/) for triage,
-  rather than shipped as a noisy network rule. The [host-triage script](triage/) runs exactly those
-  host-local checks (ports, recording-proxy artifacts, log markers, and the PostgreSQL schema) for a
-  responder who has shell access but no SIEM.
+## 検証と変換
 
-## Validate and convert
-
-These rules are validated with [sigma-cli](https://github.com/SigmaHQ/sigma-cli) (pySigma). To reproduce:
+これらのルールは [sigma-cli](https://github.com/SigmaHQ/sigma-cli)（pySigma）で検証しています。再現するには次のとおりです。
 
 ```sh
 python3 -m venv .venv && . .venv/bin/activate
 pip install sigma-cli
 
-# structural + best-practice validation (expect: 0 errors, 0 issues)
+# 構造とベストプラクティスの検証（期待: エラー 0、issues 0）
 sigma check detections/sigma/
 
-# full SigmaHQ convention set with the documented baseline for this standalone
-# rule set (expect: 0 issues). Plain `sigma check` above does not load these.
+# このスタンドアロンのルールセット向けに文書化したベースラインで、
+# SigmaHQ の規約一式を検査します（期待: issues 0）。
+# 上の素の `sigma check` はこれらのバリデータを読み込みません。
 pip install pySigma-validators-sigmahq
 sigma check --validation-config detections/tests/sigma_lint/validators.yml detections/sigma/
 
-# compile to a target query language, e.g. Splunk
+# 対象のクエリ言語へコンパイルします。例: Splunk
 sigma plugin install splunk
 sigma convert -t splunk --without-pipeline detections/sigma/artex_enrich_user_agent.yml
 
-# convert the whole tree so the correlation rules can resolve the atomic rules they reference by id
+# 相関ルールが id で参照するアトミックルールを解決できるよう、ツリー全体を変換します
 sigma convert -t splunk --without-pipeline detections/sigma/
 ```
 
-The baseline enforces every SigmaHQ convention except four checks that encode SigmaHQ's monorepo filing scheme
-and taxonomy, which do not apply to a standalone rule set; each exclusion and its rationale is documented in
-[`tests/sigma_lint/validators.yml`](tests/sigma_lint/validators.yml) and enforced by the lint test above.
+ベースラインは SigmaHQ の規約をすべて強制しますが、SigmaHQ モノレポのファイル配置とタクソノミを表す 4 つの検査は、スタンドアロンのルールセットには当てはまらないため除外しています。各除外とその理由は [`tests/sigma_lint/validators.yml`](tests/sigma_lint/validators.yml) に文書化され、上のリントテストが強制します。
 
-### Sigma backend portability
+## Sigma バックエンドの移植性
 
-The `sigma/correlation/` rules reference their atomic base rules by `id`, so they only convert on backends
-that support Sigma correlation conversion. That support varies by backend, so `-t` choice matters. The matrix
-below is measured against the pinned reference (`sigma-cli` 3.1.0, latest compatible backends) and reproduced
-by [`tests/sigma_backends/run.sh`](tests/sigma_backends/run.sh):
+`sigma/correlation/` のルールはアトミックなベースルールを `id` で参照するため、Sigma の相関変換をサポートするバックエンドでしか変換できません。そのサポートはバックエンドごとに異なるので、`-t` の選択が重要です。下の対応は、固定した基準（`sigma-cli` 3.1.0、互換性のある最新バックエンド）に対して測定し、[`tests/sigma_backends/run.sh`](tests/sigma_backends/run.sh) が再現します。
 
-- **Converts the whole tree (atomic + correlation):** Splunk (`-t splunk`), Elasticsearch EQL (`-t eql`),
-  Grafana Loki (`-t loki`). Convert `detections/sigma/` directly and you get the correlation queries too.
-- **Atomic rules only (correlations not yet supported):** Elasticsearch Lucene (`-t lucene`), OpenSearch
-  (`-t opensearch_lucene`), and the Microsoft `kusto` backend that targets Sentinel and Defender XDR
-  (`-t kusto`). On these, convert the five atomic rules and express the correlation window natively in the
-  product (e.g. a Sentinel scheduled-analytics `summarize ... by bin(TimeGenerated, 30m)`). Pass the whole
-  directory and the conversion stops with "Backend does not support correlation rules."
+- **ツリー全体（アトミック + 相関）を変換する:** Splunk（`-t splunk`）、Elasticsearch EQL（`-t eql`）、Grafana Loki（`-t loki`）。`detections/sigma/` を直接変換すると、相関クエリも得られます。
+- **アトミックルールのみ（相関はまだ未サポート）:** Elasticsearch Lucene（`-t lucene`）、OpenSearch（`-t opensearch_lucene`）、Sentinel と Defender XDR を対象とする Microsoft の `kusto` バックエンド（`-t kusto`）。これらでは 5 つのアトミックルールを変換し、相関の時間窓は製品の中でネイティブに表現します（例: Sentinel のスケジュール分析の `summarize ... by bin(TimeGenerated, 30m)`）。ディレクトリ全体を渡すと、「Backend does not support correlation rules.」で変換が止まります。
 
 ```sh
-# atomic rules only, e.g. for Microsoft Sentinel / Defender (kusto backend)
+# アトミックルールのみ。例: Microsoft Sentinel / Defender（kusto バックエンド）
 sigma plugin install kusto
 sigma convert -t kusto --without-pipeline \
   detections/sigma/artex_enrich_user_agent.yml \
@@ -252,21 +107,10 @@ sigma convert -t kusto --without-pipeline \
   detections/sigma/destructive_command_hunting.yml
 ```
 
-Known edges at the pinned versions: the Elasticsearch ES|QL target (`-t esql`) rejects the guard-marker rule
-(`String value expressions are not supported`), so convert the other three atomic rules there; and the IBM
-QRadar plugin (`ibm-qradar-aql`) is not compatible with the pinned pySigma and needs `--force-install`, so it
-is not covered by the test. Run `sigma list targets` for the backends installed in your environment.
+固定したバージョンでの既知の境界: Elasticsearch の ES|QL ターゲット（`-t esql`）はガードマーカーのルールを拒否します（`String value expressions are not supported`）。そこでは残りの 3 つのアトミックルールを変換してください。IBM QRadar プラグイン（`ibm-qradar-aql`）は固定した pySigma と互換がなく `--force-install` が必要なため、テストの対象外です。環境に入っているバックエンドは `sigma list targets` で確認してください。
 
-The examples above use `--without-pipeline`, which emits the generic field names from the rule bodies
-(`cs-user-agent`, `cs-host`, `CommandLine`). To match your product's schema, drop that flag and apply a
-processing pipeline with `-p` (see `sigma list pipelines`). Note that a product pipeline maps field names but
-may also need a target table the rules' generic `logsource` does not specify — e.g. `-p sentinel_asim` stops
-with "Unable to determine table name" until you set `query_table` for your data, so map the fields and the
-destination table to your environment before deploying.
+上の例は `--without-pipeline` を使い、ルール本体の汎用フィールド名（`cs-user-agent`、`cs-host`、`CommandLine`）をそのまま出します。製品のスキーマに合わせるには、そのフラグを外し、`-p` で処理パイプラインを適用してください（`sigma list pipelines` を参照）。ただし製品のパイプラインはフィールド名を対応付けますが、ルールの汎用 `logsource` が指定しない対象テーブルも必要になることがあります。たとえば `-p sentinel_asim` は、データに合わせて `query_table` を設定するまで「Unable to determine table name」で止まるので、配備の前にフィールドと宛先テーブルを環境へ合わせてください。
 
-## Contributing
+## 貢献
 
-Detection and hardening contributions are welcome. New rules should keep every indicator grounded in an
-observable fact, state limitations in the `description`, pass the SigmaHQ validator baseline cleanly
-(`sigma check --validation-config tests/sigma_lint/validators.yml`), and avoid any content that reads as
-attack guidance. See [`../CONTRIBUTING.en.md`](../CONTRIBUTING.en.md).
+検知とハードニングの貢献を歓迎します。新しいルールは、すべての指標を観察可能な事実に根拠を置き、限界を `description` に述べ、SigmaHQ バリデータのベースラインをきれいに通過し（`sigma check --validation-config tests/sigma_lint/validators.yml`）、攻撃の手引きとして読める内容を避けてください。[`../CONTRIBUTING.md`](../CONTRIBUTING.md) を参照してください。
