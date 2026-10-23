@@ -1,42 +1,42 @@
-# `/btw` 검증 기록
+# `/btw` の検証記録
 
-한국어 · [中文](VALIDATION.zh.md)
+日本語 · [한국어](VALIDATION.ko.md) · [中文](VALIDATION.zh.md)
 
-날짜: 2026-09-10. 브랜치: `codex/btw-side-question`. 기준 커밋(baseline): `8dae851b9b622f2ff2631f332fde9719d0b16fba`.
+日付: 2026-09-10。ブランチ: `codex/btw-side-question`。基準コミット（baseline）: `8dae851b9b622f2ff2631f332fde9719d0b16fba`。
 
-> 이 문서는 원본 중국어 문서(`VALIDATION.zh.md`)를 한국어로 옮긴 것입니다. 상류(upstream) 저장소의 변경을 대조하기 쉽도록 원본은 그대로 보존합니다.
+> この文章は、中国語の原文を韓国語にローカライズした文書を、さらに日本語へ訳したものです。上流との差分を取りやすいように、中国語の原文（`VALIDATION.zh.md`）はそのまま保存してあります。
 
-독립된 PostgreSQL 테스트 DB 와 데이터 디렉터리를 사용했습니다. 실제 모델 자격 증명은 독립 테스트 환경에만 주입했고 코드나 이 기록에는 쓰지 않았으며, 제품 기본 모델도 바꾸지 않았습니다. Go 1.26.3, norma v0.3.6, Next.js 16.2.9.
+独立した PostgreSQL のテスト DB とデータディレクトリを使いました。実際のモデルの資格情報は独立したテスト環境にだけ注入し、コードやこの記録には書いておらず、製品の既定モデルも変えていません。Go 1.26.3、norma v0.3.6、Next.js 16.2.9。
 
-실제 모델 대화, 반환 객체, 엔지니어링 단언, Qwen 원본 심사 텍스트는 [validation-2026-09-10.json](validation-2026-09-10.json) 에 저장했으며, 그 안에는 API 자격 증명이 없습니다.
+実際のモデルの会話、返却オブジェクト、エンジニアリングの断言、Qwen の原文の審査テキストは [validation-2026-09-10.json](validation-2026-09-10.json) に保存してあり、その中に API の資格情報はありません。
 
-## 엔지니어링 검사
+## エンジニアリング検査
 
-아래 항목은 모두 통과했으며, 괄호 안은 근거 테스트입니다.
+下の項目はすべて通過しており、括弧の中は根拠のテストです。
 
-- 구조화 메시지와 도구 인자의 깊은 복사: 통과(근거 `TestCheckpointDeepCopyAndBoundaries`).
-- 요약·압축 요청이 덮어쓰지 않음, 완결된 응답과 종료 상태 발행, 생성 도중 반쪽 응답 제외: 통과(근거 `TestCheckpointDeepCopyAndBoundaries`, `TestSnapshotExcludesPartialStreamAndSelectsPoolMember`).
-- 실제 모델 풀 구성원 신원: 통과(근거 `TestSnapshotExcludesPartialStreamAndSelectsPoolMember`).
-- 도구 짝 맞추기, 20 묶음 재생, 예산 삭감과 초과 오류: 통과(근거 `TestBuildRequestCompactionToolPairingAndBudget`).
-- 메인과 곁질문의 병렬 실행, 양방향 취소 격리: 통과(근거: 블로킹 방식 Provider, `TestMainSideConcurrencyAndIndependentCancellation`).
-- 도구 실행 없음, 스트리밍·비스트리밍, 실패 시점의 기존 사용량: 통과(근거 `TestServiceNoToolsAndUsageOnFailure`).
-- 실제 norma ChatAgent 와 로컬 Read 도구, 메인 transcript·활동 격리: 통과(근거 `TestSideActualChatCheckpointToolResultAndTranscriptIsolation` 의 스트리밍·비스트리밍 하위 사례).
-- 영속화, 페이지 나누기, 멱등성, 재시작 후 부분 응답 보존: 통과(근거 `TestSideHistoryIdempotencyPagingAndRecovery`).
-- 비우기와 뒤늦은 쓰기의 경쟁, 부모 리소스 삭제, 버전 비교: 통과(근거 `TestSideClearLateWritersAndDeletedParent`).
-- MainAgent·Worker 아카이브와 복원(v1·v2·v3): 통과(근거 `TestSideTaskArchiveVersions`).
-- 세 가지 부모 인터페이스, 인증, 리소스 귀속, Worker 논리 삭제: 통과(근거 `TestSideHTTPGlobalLimitTaskWorkerAndDeletion`, `TestSideCheckpointPersistsBeforeAdmissionAndRestart`).
-- 바쁜 메인 세션에서도 곁질문 가능, 독립 SSE 재연결·끊김, 취소, 비우기: 통과(근거 `TestSideHTTPBusyIsolationClearAndReconnect`).
-- 부모 세션당 1 개·전역 4 개 동시 실행: 통과(근거: 두 개의 `TestSideHTTP…` 사례).
-- 제출 전 스냅샷 저장, 재시작 후 이어 묻기, 오래된 세션이 스냅샷을 위조하지 못함: 통과(근거 `TestSideCheckpointPersistsBeforeAdmissionAndRestart`).
-- 캐시에 있는 설정이 삭제되거나 모델이 바뀌면 계속 진행을 거부: 통과(근거 `TestSideRejectsDeletedOrChangedCachedProfile`).
-- 아카이브 전에 취소하고 최종 응답과 사용량이 저장되기를 기다림: 통과(근거 `TestSideTaskDrainPersistsBeforeArchive`).
-- 스트리밍 소비자가 일찍 취소해도 사용량을 한 번만 기록하고 곁질문에 귀속: 통과(근거 `TestSideUsageRecordedOnceOnConsumerCancellation`).
-- 재시작으로 자동 복원된 Worker·deadline 실행 컨텍스트가 계속 새 스냅샷을 발행: 통과(근거 `TestSideRestoredWorkerRuntimePublishesNewCheckpoint`).
-- 관련 패키지의 race 검사: 통과(근거: 아래 명령).
-- TypeScript 와 프로덕션 빌드: 통과(근거 `npx tsc --noEmit`, `npm run build`).
-- 새로 추가한 프런트엔드 모듈의 Biome 검사: 통과(근거 `biome check`, 새 모듈 3 개).
+- 構造化メッセージとツール引数の深いコピー: 通過（根拠 `TestCheckpointDeepCopyAndBoundaries`）。
+- 要約と圧縮のリクエストが上書きしないこと、完結した応答と終了状態の発行、生成途中の半分の応答の除外: 通過（根拠 `TestCheckpointDeepCopyAndBoundaries`、`TestSnapshotExcludesPartialStreamAndSelectsPoolMember`）。
+- 実際のモデルプールの構成員の身元: 通過（根拠 `TestSnapshotExcludesPartialStreamAndSelectsPoolMember`）。
+- ツールの組合わせ、20 組の再生、予算の削減と超過エラー: 通過（根拠 `TestBuildRequestCompactionToolPairingAndBudget`）。
+- メインとサイド質問の並列実行、双方向のキャンセル隔離: 通過（根拠: ブロッキング方式の Provider、`TestMainSideConcurrencyAndIndependentCancellation`）。
+- ツール実行がないこと、ストリーミングと非ストリーミング、失敗時点の既存の使用量: 通過（根拠 `TestServiceNoToolsAndUsageOnFailure`）。
+- 実際の norma ChatAgent とローカルの Read ツール、メインの transcript とアクティビティの隔離: 通過（根拠 `TestSideActualChatCheckpointToolResultAndTranscriptIsolation` のストリーミングと非ストリーミングの下位ケース）。
+- 永続化、ページ分け、冪等性、再起動後の部分応答の保存: 通過（根拠 `TestSideHistoryIdempotencyPagingAndRecovery`）。
+- クリアと遅れた書き込みの競合、親リソースの削除、バージョン比較: 通過（根拠 `TestSideClearLateWritersAndDeletedParent`）。
+- MainAgent と Worker のアーカイブと復元（v1、v2、v3）: 通過（根拠 `TestSideTaskArchiveVersions`）。
+- 3 つの親インターフェース、認証、リソースの帰属、Worker の論理削除: 通過（根拠 `TestSideHTTPGlobalLimitTaskWorkerAndDeletion`、`TestSideCheckpointPersistsBeforeAdmissionAndRestart`）。
+- 忙しいメインセッションでもサイド質問ができること、独立した SSE の再接続と切断、キャンセル、クリア: 通過（根拠 `TestSideHTTPBusyIsolationClearAndReconnect`）。
+- 親セッションあたり 1 つ、全体で 4 つの同時実行: 通過（根拠: 2 つの `TestSideHTTP…` のケース）。
+- 提出前のスナップショット保存、再起動後の続けての質問、古いセッションがスナップショットを偽造できないこと: 通過（根拠 `TestSideCheckpointPersistsBeforeAdmissionAndRestart`）。
+- キャッシュにある設定が削除されるか、モデルが変わると、続行を拒否すること: 通過（根拠 `TestSideRejectsDeletedOrChangedCachedProfile`）。
+- アーカイブの前にキャンセルし、最終応答と使用量が保存されるのを待つこと: 通過（根拠 `TestSideTaskDrainPersistsBeforeArchive`）。
+- ストリーミングの消費者が早くキャンセルしても、使用量を 1 回だけ記録し、サイド質問に帰属させること: 通過（根拠 `TestSideUsageRecordedOnceOnConsumerCancellation`）。
+- 再起動で自動復元された Worker と deadline の実行コンテキストが、引き続き新しいスナップショットを発行すること: 通過（根拠 `TestSideRestoredWorkerRuntimePublishesNewCheckpoint`）。
+- 関連パッケージの race 検査: 通過（根拠: 下のコマンド）。
+- TypeScript とプロダクションビルド: 通過（根拠 `npx tsc --noEmit`、`npm run build`）。
+- 新しく追加したフロントエンドモジュールの Biome 検査: 通過（根拠 `biome check`、新しいモジュール 3 つ）。
 
-따로 버려도 되는 데이터베이스에 `ARTEX_PG_DSN` 을 설정하면 자동화 검사를 재현할 수 있습니다(운영 DB 를 가리키지 마십시오):
+捨ててもよいデータベースに `ARTEX_PG_DSN` を設定すると、自動化検査を再現できます（運用 DB を指さないでください）。
 
 ```sh
 go test -race ./agent ./db ./server ./sidequestion ./llmrec ./llmpool \
@@ -47,49 +47,49 @@ npx biome check src/lib/side-questions.ts src/hooks/use-side-questions.ts src/co
 npm run build
 ```
 
-전체 Go 회귀 테스트는 모두 통과(green)는 아닙니다. `server` 패키지의 기존 테스트 두 개가 임시 디렉터리 정리 단계에서 실패하며, 둘 다 `TempDir RemoveAll … directory not empty` 를 보고합니다:
+Go の回帰テスト全体が、すべて通過（green）だったわけではありません。`server` パッケージの既存テスト 2 つが、一時ディレクトリの整理段階で失敗し、どちらも `TempDir RemoveAll … directory not empty` を報告します。
 
 - `TestInheritedActivityDetailAndRelationDeletion`
 - `TestTaskMetadataPatchReturnsRenameAndPin`
 
-위의 수정하지 않은 기준 커밋에서 소스를 내려받아 같은 격리 환경에서 `server` 패키지를 다시 돌려도 이 두 정리 실패가 똑같이 재현됩니다. 기준 커밋 실행에서는 `TestCoreTaskLifecyclePG` 의 대상 노드 개수 단언 실패도 따로 나타났으나, 최종 수정본의 `server` 회귀에서는 그 단언 실패가 없었습니다. 다른 패키지는 통과했고, 이번 곁질문 관련 사례와 race 검사도 통과했습니다. 기준 커밋의 문제를 이번 검수 통과로 표시하지 않았고, 숨은 문제를 가리려고 기존 단언을 바꾸지도 않았습니다.
+上の、修正していない基準コミットからソースを取得し、同じ隔離環境で `server` パッケージを回し直しても、この 2 つの整理失敗は同じように再現します。基準コミットの実行では、`TestCoreTaskLifecyclePG` の対象ノード数の断言失敗も別に現れましたが、最終修正版の `server` 回帰では、その断言失敗はありませんでした。ほかのパッケージは通過し、今回のサイド質問に関係するケースと race 検査も通過しました。基準コミットの問題を、今回の検収の通過としては表示せず、隠れた問題を覆うために既存の断言を変えることもしませんでした。
 
-Next.js 빌드는 여러 lockfile·workspace 루트 추론에 관한 기존 경고를 출력하지만, 빌드는 완료되고 모든 페이지가 성공적으로 생성됩니다.
+Next.js のビルドは、複数の lockfile と workspace ルートの推論に関する既存の警告を出力しますが、ビルドは完了し、すべてのページが正常に生成されます。
 
-## 브라우저 검사
+## ブラウザ検査
 
-Codex 내장 브라우저로 독립된 로컬 Go 서비스와 Next.js 개발 서버에 연결했습니다. 데스크톱과 390 × 844 좁은 화면에서 다음 수동·자동 조작을 수행하고 스크린샷과 브라우저 로그를 확인했습니다:
+Codex の組み込みブラウザで、独立したローカルの Go サービスと Next.js の開発サーバーへ接続しました。デスクトップと 390 × 844 の狭い画面で、次の手動と自動の操作を行い、スクリーンショットとブラウザのログを確認しました。
 
-- 일반 채팅이 실행되는 동안 `/btw` 를 입력하면 본문 내용과 곁질문이 동시에 표시되고, 데스크톱 사이드바도 정상입니다.
-- 이어서 추가 질문을 했습니다. 곁질문을 중지해도 이미 생성된 부분은 남고, 본문 흐름은 계속됩니다.
-- 패널을 닫아도 요청은 계속되고, 다시 열면 완결된 응답을 복구합니다. 페이지를 새로 고친 뒤 내용 없이 `/btw` 만 입력하면 기록을 복구합니다.
-- 좁은 화면 Drawer 에서 입력, 버튼, 기록, 닫기 조작이 정상이며 가로 넘침이 없습니다.
-- 비우기는 확인 팝업을 띄우고, 비운 뒤에는 기록이 사라지지만 메인 transcript 와 스냅샷은 그대로 남습니다.
-- 작업의 MainAgent 와 두 Worker 에게 각각 질문하고 전환했을 때, 에이전트 탭과 기록이 서로 섞이지 않았습니다.
-- 블로킹 방식 로컬 모델 픽스처로 Worker 를 계속 실행시킨 상태에서, Worker 의 메인 입력창으로 `/btw` 를 제출했습니다. 곁질문을 중지한 뒤에도 Worker 는 실시간 실행 상태와 자신의 일시정지 버튼을 그대로 표시했고, 곁질문은 부분 응답을 저장했습니다.
-- 브라우저 오류·경고 로그가 비어 있습니다.
+- 一般のチャットが実行されているあいだに `/btw` を入れると、本文の内容とサイド質問が同時に表示され、デスクトップのサイドバーも正常です。
+- 続けて追加の質問をしました。サイド質問を停止しても、すでに生成された部分は残り、本文の流れは続きます。
+- パネルを閉じてもリクエストは続き、再び開くと完結した応答を復旧します。ページを再読み込みしたあと、内容なしで `/btw` だけを入れると、記録を復旧します。
+- 狭い画面の Drawer で、入力、ボタン、記録、閉じる操作が正常で、横方向の溢れはありません。
+- クリアは確認のポップアップを出し、クリアしたあとは記録が消えますが、メインの transcript とスナップショットはそのまま残ります。
+- タスクの MainAgent と 2 つの Worker にそれぞれ質問して切り替えたとき、エージェントのタブと記録は混ざりませんでした。
+- ブロッキング方式のローカルモデルのフィクスチャで Worker を動かし続けた状態で、Worker のメイン入力欄から `/btw` を提出しました。サイド質問を停止したあとも、Worker はリアルタイムの実行状態と自分の一時停止ボタンをそのまま表示し、サイド質問は部分応答を保存しました。
+- ブラウザのエラーと警告のログは空です。
 
-제어 가능한 픽스처는 동시 실행 타이밍을 정밀하게 검증하려고 쓴 것이며, 실제 모델의 출력 속도에 의존하지 않습니다. 디버깅 중 두 번의 Worker 실행 검사에서는 유효한 동시 실행 구간이 만들어지지 않았는데(작업이 이미 끝났거나 응답이 미리 끝남), 픽스처를 고쳐 다시 수행해 통과했습니다. 이 초기 조작은 유효한 통과로 치지 않습니다.
+制御できるフィクスチャは、同時実行のタイミングを精密に検証するために使ったものであり、実際のモデルの出力速度には依存しません。デバッグ中の 2 回の Worker 実行検査では、有効な同時実行の区間が作れませんでした（タスクがすでに終わっていたか、応答が先に終わった）。フィクスチャを直して再実行し、通過しました。この最初の操作は、有効な通過には数えません。
 
-## 실제 모델 대화
+## 実際のモデルとの会話
 
-먼저 `grok-4.6` 을 탐지했습니다. OpenAI 호환 인터페이스는 `http://127.0.0.1:12580/tingly/openai` 입니다. 탐지 결과 HTTP 200 과 함께 모델 이름 `grok-4.6` 및 `READY` 를 반환했고, 2.82 초가 걸렸습니다. 1순위가 사용 가능했으므로 Tingly 의 `glm` 이나 Zhipu 의 `glm-5.3` 예비 체인은 켜지 않았고, 이 두 예비 서비스는 이번에 검증하지 않았습니다.
+まず `grok-4.6` を探査しました。OpenAI 互換インターフェースは `http://127.0.0.1:12580/tingly/openai` です。探査の結果は HTTP 200 とともに、モデル名 `grok-4.6` と `READY` を返し、2.82 秒かかりました。第 1 候補が使えたので、Tingly の `glm` や Zhipu の `glm-5.3` の予備チェーンはオンにせず、この 2 つの予備サービスは今回検証していません。
 
-- 메인 세션이 실행되는 동안 자산·목표·표식을 질문: `redhaze.top`, 첫 페이지 읽기와 목표 요약, `BTW-REAL-0910` 을 반환했고 곁질문이 완료됨(16.97 초).
-- 메인 세션이 첫 페이지 읽기를 마친 뒤 도구 근거를 질문: WebFetch 200, curl 의 301 → 302 → 200 리다이렉트, 페이지 제목을 정확히 인용함(7.24 초).
-- 곁질문이 Bash 로 테스트 파일을 만들라고 요구: 실행을 거부했고 대상 파일이 생성되지 않음(7.74 초).
-- 완료 후의 곁질문이 메인 컨텍스트를 바꾸지 않음: 메인 transcript 의 SHA-256 과 메인 활동 기록이 그대로 일치했고, 곁질문의 도구 실행 횟수는 0.
-- Go 서비스를 실제로 중지·재시작한 뒤 이어서 질문: 이전 곁질문 기록 3 건을 보존했고, 영속화한 스냅샷에서 바로 자산·표식·제목을 답했으며 메인 에이전트를 다시 돌리지 않음.
-- 새 세션에서 Grok 비스트리밍 설정 사용: 자산과 `ATOMIC-0910` 을 정확히 답했고, 사용량을 반환·저장함(input 11734, output 138, cache_read 11520).
+- メインセッションが実行されているあいだに、資産、目標、標識を質問: `redhaze.top`、最初のページの読み取りと目標の要約、`BTW-REAL-0910` を返し、サイド質問は完了（16.97 秒）。
+- メインセッションが最初のページの読み取りを終えたあと、ツールの根拠を質問: WebFetch 200、curl の 301 → 302 → 200 のリダイレクト、ページのタイトルを正確に引用（7.24 秒）。
+- サイド質問が Bash でテストファイルを作るよう要求: 実行を拒否し、対象ファイルは作られなかった（7.74 秒）。
+- 完了後のサイド質問がメインのコンテキストを変えないこと: メイン transcript の SHA-256 とメインのアクティビティ記録はそのまま一致し、サイド質問のツール実行回数は 0。
+- Go サービスを実際に停止して再起動したあと、続けて質問: 以前のサイド質問の記録 3 件を保存し、永続化したスナップショットからすぐに資産、標識、タイトルを答え、メインエージェントは回し直さなかった。
+- 新しいセッションで Grok の非ストリーミング設定を使用: 資産と `ATOMIC-0910` を正確に答え、使用量を返して保存した（input 11734、output 138、cache_read 11520）。
 
-자산 사례의 메인 세션은 WebFetch 와 Bash/curl 로 공개된 첫 페이지를 읽었고, 랜딩 페이지는 `https://id.redhaze.top/home`, 페이지가 반환한 제목은 "红幕科技 RedHaze Group · 全球综合集团门户" 였습니다(모델이 반환한 원문이라 그대로 인용). Bash 는 응답을 로컬 테스트 파일에 잠시 저장했을 뿐 원격에 쓰기를 실행하지 않았습니다. 이 사실은 "곁질문이 도구를 실행하지 않았다"는 점과 따로 확인했습니다.
+資産の事例のメインセッションは、WebFetch と Bash/curl で公開された最初のページを読みました。ランディングページは `https://id.redhaze.top/home`、ページが返したタイトルは「红幕科技 RedHaze Group · 全球综合集团门户」でした（モデルが返した原文なので、そのまま引用します）。Bash は応答をローカルのテストファイルに一時的に保存しただけで、リモートへの書き込みは実行していません。この事実は、「サイド質問がツールを実行しなかった」という点とは別に確認しました。
 
-메인 transcript 검증값: `e7e61f135a4a120954b539f357e8c4205d7d5cd7460dcaf3dc0fd066463e1d00`.
+メイン transcript の検証値: `e7e61f135a4a120954b539f357e8c4205d7d5cd7460dcaf3dc0fd066463e1d00`。
 
-**사용량 한계:** Tingly 의 Grok 스트리밍 응답은 usage 를 반환하지 않았습니다. 따로 `stream_options.include_usage=true` 를 직접 보내 검증했을 때 HTTP 200, 데이터 프레임 12 개, usage 프레임 0 개였습니다. 따라서 스트리밍 테스트에서의 0 은 엔드포인트가 사용량을 제공하지 않는다는 뜻이며, 과금이 없었다는 뜻으로 해석해서는 안 됩니다. 비스트리밍 사용량과 픽스처의 실패·취소 사용량은 모두 올바르게 저장됐습니다.
+**使用量の限界:** Tingly の Grok ストリーミング応答は usage を返しませんでした。別に `stream_options.include_usage=true` を直接送って検証したとき、HTTP 200、データフレーム 12 個、usage フレーム 0 個でした。したがって、ストリーミングテストでの 0 は、エンドポイントが使用量を提供しないという意味であり、課金がなかったという意味に解釈してはなりません。非ストリーミングの使用量と、フィクスチャの失敗およびキャンセルの使用量は、いずれも正しく保存されました。
 
-## Qwen 심사
+## Qwen の審査
 
-심사 모델은 `qwen-flash`, OpenAI 호환 인터페이스는 `https://dashscope.aliyuncs.com/compatible-mode/v1`, HTTP 200 입니다. 앞의 세 가지 실제 곁질문 대화, 메인 세션의 도구 근거, 엔지니어링 단언을 제공했고, `verdict: accept` 와 `concerns: []` 를 반환했습니다. 응답이 자산·표식·페이지 읽기 증거와 일치하고 곁질문 도구 거부가 제약에 부합한다고 판단했습니다. 심사 사용량: prompt 6625, completion 312, total 6937.
+審査モデルは `qwen-flash`、OpenAI 互換インターフェースは `https://dashscope.aliyuncs.com/compatible-mode/v1`、HTTP 200 です。前の 3 つの実際のサイド質問の会話、メインセッションのツール根拠、エンジニアリングの断言を渡し、`verdict: accept` と `concerns: []` が返りました。応答が資産、標識、ページ読み取りの証拠と一致し、サイド質問のツール拒否が制約に合う、と判断しました。審査の使用量: prompt 6625、completion 312、total 6937。
 
-이번 Qwen 심사 범위에는 나중에 추가한 서비스 재시작과 비스트리밍 테스트가 들어가지 않습니다. Qwen 의 "쓰기 없음" 이라는 일반화는 지나치게 넓습니다. 메인 세션의 curl 은 실제로 로컬 응답 임시 파일을 만들었고, 이는 앞에서 명확히 기록했습니다. 동시성, 도구 실행 0 회, transcript 격리는 엔지니어링 단언으로 판단하며, 모델 심사는 응답 품질 평가를 보조할 뿐입니다.
+今回の Qwen 審査の範囲には、あとから追加したサービスの再起動と非ストリーミングのテストは入りません。Qwen の「書き込みなし」という一般化は広すぎます。メインセッションの curl は実際にローカルの応答の一時ファイルを作っており、これは前にはっきり記録しました。同時性、ツール実行 0 回、transcript の隔離はエンジニアリングの断言で判断し、モデルの審査は応答の品質評価を補助するだけです。

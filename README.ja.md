@@ -6,7 +6,7 @@
 
 UI と生成される出力はデフォルトで英語になっており、**設定（システム → 設定 → 表示言語）で韓国語・中国語・スペイン語・日本語に切り替えられます。** 言語を変えると、エージェントが生成するレポート・要約・チャット応答の言語も一緒に変わります。
 
-日本語 · [English](README.md) · [한국어](README.ko.md) · [中文](README.zh.md) · [Español](README.es.md)
+日本語 · [English](README.en.md) · [한국어](README.ko.md) · [中文](README.zh.md) · [Español](README.es.md)
 
 [![ci](https://github.com/jiwoochris/artex-global/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jiwoochris/artex-global/actions/workflows/ci.yml) [![detections](https://github.com/jiwoochris/artex-global/actions/workflows/detections.yml/badge.svg?branch=main)](https://github.com/jiwoochris/artex-global/actions/workflows/detections.yml) [![web](https://github.com/jiwoochris/artex-global/actions/workflows/web.yml/badge.svg?branch=main)](https://github.com/jiwoochris/artex-global/actions/workflows/web.yml) [![license: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 
@@ -22,7 +22,7 @@ UI と生成される出力はデフォルトで英語になっており、**設
 >
 > - **無許可の利用はそれ自体が犯罪です。** 自分が所有していないシステム、または明示的な書面による許可を得ていないシステムに対して、いかなるスキャン・探査・エクスプロイトも実行しないでください。大韓民国では、情報通信網への無許可の侵入は情報通信網法（Network Act）に違反し、個人情報が関わる場合には個人情報保護法（Personal Information Protection Act）も適用されます。
 > - **稼働中のサービスや第三者の資産を標的にしないでください。** 自分が所有する、学習・研究・ローカルに隔離された環境でのみ検証してください（OWASP Juice Shop や DVWA のように、意図的に脆弱に作られた標的）。
-> - **防御側の視点で読んでください。** このリポジトリには、自律型 AI 攻撃に対する検知シグネチャやハードニングのチェックリストといった防御・検知の資料もまとめてあります。→ **[防御・検知ガイド](docs/defense-en.md)**（[韓国語版](docs/defense-ko.md)もあります）
+> - **防御側の視点で読んでください。** このリポジトリには、自律型 AI 攻撃に対する検知シグネチャやハードニングのチェックリストといった防御・検知の資料もまとめてあります。→ **[防御・検知ガイド](docs/defense-ja.md)**（[English](docs/defense-en.md) · [한국어](docs/defense-ko.md)）
 >
 > この警告、および下記の[利用制限と免責事項](#ライセンスと免責事項)に同意できない場合は、このリポジトリをダウンロードしたり利用したりしないでください。
 
@@ -344,7 +344,7 @@ flowchart TB
 
 このリポジトリは、自律型 AI 攻撃がどのように動くのかを **防御側** が理解し、それを検知・遮断する能力を育てる手助けをすることを目指します。上のアーキテクチャで見た ARTEX の挙動を裏返して **防御側の視点** に組み替え、何を観察し、どこを締めるべきかを示します。
 
-- **[防御・検知ガイド (docs/defense-en.md)](docs/defense-en.md)**（[韓国語版](docs/defense-ko.md)もあります）
+- **[防御・検知ガイド (docs/defense-ja.md)](docs/defense-ja.md)**（[English](docs/defense-en.md) · [한국어](docs/defense-ko.md)）
   - 自律型 AI 攻撃が従来のスキャナとどう違うのか、なぜ検知が難しいのか、それでもどう検知するのか
   - 防御側が観察できる指紋（IoC と挙動シグネチャ） — 標的側の視点とフォレンジックの視点に分けて
   - 攻撃者が狙う侵入口と、それに対応するハードニング（補助認証、IDOR、クレデンシャルスタッフィング、セッションとシークレット）
@@ -356,7 +356,7 @@ flowchart TB
   - **[ホストトリアージスクリプト (detections/triage/)](detections/triage/)**: SIEM もネットワークセンサーもない、疑わしい単一ホストのシェルの前に立つ対応者のための、読み取り専用スクリプト [`artex_host_triage.py`](detections/triage/artex_host_triage.py) です。上記のルールと同じ指紋を確認し、さらに — そのマシン上で — 指標 CSV が意図的に Sigma ルールなしで携える 3 つのホスト/DB 指標（サーバーのリッスンポート、記録プロキシのエンドポイント、PostgreSQL の探索スキーマ）も確認します。これらはログでもネットワークでも観察できないためです。標準ライブラリだけで動き、インストールするものは何もありません。どの検出結果もトリアージの手がかりであり、その指標行と同じ但し書きを携え、それ自体で帰属を断定するものではありません。
   - 上記のルール・レイヤー・指標、そしてホストトリアージスクリプトのセルフテストは、すべてリポジトリのテスト（[detections/tests/](detections/tests/)）で再実行・検証されます。実行できない検知ルールは主張にすぎません。
 
-> この資料は継続的に拡充しています。追加の検知ルールやハードニング項目は issue で提案してください。ルールを直接送る場合は、[コントリビューションガイドの「Contributing detection rules and detection tests」の節](CONTRIBUTING.en.md#contributing-detection-rules-and-detection-tests)の取り決めに従ってください（どの指標も観察可能な事実に根拠を置き、限界を述べ、静的検証を通し、再現可能なテストを含めること）。
+> この資料は継続的に拡充しています。追加の検知ルールやハードニング項目は issue で提案してください。ルールを直接送る場合は、[貢献ガイドの「検知ルール・検知テストへの貢献」](CONTRIBUTING.md#検知ルール検知テストへの貢献)の取り決めに従ってください（どの指標も観察可能な事実に根拠を置き、限界を述べ、静的検証を通し、再現可能なテストを含めること）。
 
 ---
 
@@ -375,7 +375,7 @@ flowchart TB
 
 その他の開発トピック（手動での脆弱性の再検証など）については、[`README.zh.md`](README.zh.md#开发) の「开发」（開発）の節を参照してください。
 
-このグローバル版が上流の ARTEX に加えた変更は、[変更履歴 (CHANGELOG.en.md)](CHANGELOG.en.md) に記録されています。
+このグローバル版が上流の ARTEX に加えた変更は、[変更履歴 (CHANGELOG.md)](CHANGELOG.md) に記録されています。英語版は [CHANGELOG.en.md](CHANGELOG.en.md)、韓国語版は [CHANGELOG.ko.md](CHANGELOG.ko.md) です。
 
 ---
 

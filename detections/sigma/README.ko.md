@@ -1,6 +1,6 @@
 # ARTEX 탐지 규칙 (Sigma / 호스트·로그·SIEM)
 
-한국어 · [English](README.md)
+한국어 · [日本語](README.md) · [English](README.en.md)
 
 이 디렉터리는 ARTEX 탐지 묶음에서 호스트·로그·SIEM 계층을 맡습니다. 여기 실린
 [Sigma](https://sigmahq.io) 규칙은 방어 가이드([한국어](../../docs/defense-ko.md) ·
@@ -119,6 +119,6 @@ sigma convert -t splunk --without-pipeline detections/sigma/
 탐지 기여를 환영합니다. 새 규칙은 모든 지표를 관측 가능한 사실에 근거해 두고, 한계를 `description` 에
 밝히며, SigmaHQ 검증기 기준선을 깨끗이 통과하고
 (`sigma check --validation-config ../tests/sigma_lint/validators.yml .`), 공격 안내로 읽히는 내용을
-담지 않아야 합니다. [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md)와
+담지 않아야 합니다. [`../../CONTRIBUTING.ko.md`](../../CONTRIBUTING.ko.md)와
 [`../suricata/`](../suricata/)의 네트워크 계층, 그리고 [`../README.ko.md`](../README.ko.md)를
 참조하십시오.

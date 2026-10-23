@@ -1,87 +1,57 @@
-# 기여 가이드 (Contributing)
+# 貢献ガイド (Contributing)
 
-한국어 · [English](CONTRIBUTING.en.md)
+日本語 · [English](CONTRIBUTING.en.md) · [한국어](CONTRIBUTING.ko.md)
 
-ARTEX 글로벌판(`artex-global`)에 관심을 가져 주셔서 고맙습니다. 이 문서는 기여를 시작하기 전에
-알아 두어야 할 범위·방침·절차를 한국어로 정리한 것입니다. 기여를 보내기 전에 반드시
-[사용 범위와 법적 책임](#사용-범위와-법적-책임)과 [현지화 방침](#현지화-방침)을 먼저 읽어 주십시오.
+ARTEX グローバル版（`artex-global`）に関心をお寄せいただき、ありがとうございます。この文書は、貢献を始める前に知っておくべき範囲・方針・手順を日本語でまとめたものです。貢献を送る前に、必ず[利用範囲と法的責任](#利用範囲と法的責任)と[ローカライズ方針](#ローカライズ方針)を先にお読みください。
 
-- 버그를 신고하거나 기능을 제안하려면 → [이슈 템플릿](https://github.com/jiwoochris/artex-global/issues/new/choose)을 사용하십시오.
-- 번역·현지화 오류를 발견했다면 → "번역·현지화 오류" 이슈 템플릿을 사용하십시오.
-- 보안 취약점을 발견했다면 → **공개 이슈로 올리지 말고** [SECURITY.md](SECURITY.md)의 절차를 따라 주십시오.
-- 모든 참여자는 [행동 강령(CODE_OF_CONDUCT.md)](CODE_OF_CONDUCT.md)을 지켜야 합니다.
+- バグを報告する、または機能を提案するときは → [Issue テンプレート](https://github.com/jiwoochris/artex-global/issues/new/choose)を使ってください。
+- 翻訳・ローカライズの誤りを見つけたら → 「翻訳・ローカライズの誤り」Issue テンプレートを使ってください。
+- セキュリティ上の脆弱性を見つけたら → **公開 Issue にはせず**、[SECURITY.md](SECURITY.md)の手順に従ってください。
+- すべての参加者は、[行動規範(CODE_OF_CONDUCT.md)](CODE_OF_CONDUCT.md)を守らなければなりません。
 
 ---
 
-## 사용 범위와 법적 책임
+## 利用範囲と法的責任
 
-ARTEX 는 LLM 멀티 에이전트가 **자율적으로** 침투 테스트를 수행하는 공격 보안 도구입니다.
-기여자도 사용자와 똑같은 범위 제한을 받습니다.
+ARTEX は、LLM マルチエージェントが**自律的に**ペネトレーションテストを行う、攻撃側のセキュリティツールです。貢献者にも、ユーザーと同じ範囲の制限が適用されます。
 
-- 코드를 검증할 때는 **자신이 소유했거나 서면으로 명시적 허가를 받은 대상**, 또는
-  **로컬 격리 환경**(예: Docker 로 띄운 OWASP Juice Shop·DVWA 같은, 의도적으로 취약하며
-  본인이 소유한 대상)에만 도구를 실행하십시오.
-- 허가 범위를 벗어난 실제·운영·원격 시스템에 스캐닝·탐지·익스플로잇을 수행하는 코드,
-  또는 그런 사용을 조장하는 변경은 받지 않습니다.
-- 대한민국에서 권한 없이 타인의 정보통신망에 침입하거나 장애를 일으키는 행위는
-  「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 위반이며, 수집·노출되는 개인정보는
-  「개인정보 보호법」의 적용을 받습니다. 자세한 고지는 [README](README.ko.md#️-먼저-읽어-주세요--사용-범위와-국내법-고지)에 있습니다.
+- コードを検証するときは、**自分が所有している対象、または書面で明示的な許可を得ている対象**、もしくは**ローカルに隔離された環境**（例: Docker で起動した OWASP Juice Shop や DVWA のように、意図的に脆弱であり、自分が所有している対象）に対してだけ、ツールを実行してください。
+- 許可された範囲の外にある実システム・本番システム・リモートシステムに対してスキャン・探査・エクスプロイトを行うコード、またはそのような利用を助長する変更は、受け付けません。
+- 大韓民国では、無許可で他人の情報通信網に侵入したり、障害を引き起こしたりする行為は「情報通信網の利用促進及び情報保護等に関する法律」に違反します。収集されたり露出したりする個人情報には「個人情報保護法」が適用されます。詳しい告知は[README](README.md#️-最初にお読みください--許可された利用と法的告知)にあります。
 
-기여로 제출한 코드·문서가 어떻게 쓰이는지에 대한 법적 책임은 그것을 실행하는 사용자 본인이
-부담합니다. 이 저장소는 "있는 그대로(AS IS)" 제공됩니다.
+貢献したコードや文書がどう使われるかの法的責任は、それを実行するユーザー本人が負います。このリポジトリは「現状のまま」（AS IS）で提供されます。
 
 ---
 
-## 현지화 방침
+## ローカライズ方針
 
-이 저장소의 존재 이유는 원본 [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX)(현재 접속 불가, 2026-10 확인)의
-**판단 성능을 그대로 보존하면서 사용자에게 보이는 산출물만 설정한 언어로 바꾸는 것**입니다.
-이 방침을 벗어나는 번역 기여는 성능을 떨어뜨릴 수 있으므로 받지 않습니다.
+このリポジトリがあるのは、オリジナルの [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX)（現在アクセス不可、2026-10 確認）の**判断性能をそのまま保ちながら、ユーザー向けの出力だけを設定した言語に変える**ためです。この方針から外れる翻訳の貢献は性能を下げることがあるため、受け付けません。
 
-- **에이전트의 내부 추론 프롬프트(행동 지침 본문)는 번역하지 마십시오.** 원문(중국어)으로
-  벤치마크된 동작을 유지해야 합니다. 이 본문은 `agent/promptcatalog.go` 와 DB 시드
-  (`agent_prompts`)에 있습니다. 번역은 에이전트의 판단에 드리프트를 일으킵니다.
-- **사용자에게 노출되는 산출물만 설정한 언어로 강제합니다.** 탐지 결과(`report_finding`),
-  사실 요약(`record_fact`), 최종 리포트, 대화 응답이 여기에 해당합니다. 이 강제는
-  `agent/prompt.go` 의 `langDirective()` 라는 코드 고정 꼬리로 각 역할의 system
-  프롬프트 말미에 붙습니다. 출력 언어를 바꾸려면 이 함수를 수정하십시오.
-- **명령·페이로드·코드·URL·로그 원문은 번역하지 않습니다.** 분석에 필요한 원본이므로
-  그대로 둡니다.
-- **원본 중국어는 보존합니다.** 문서는 `README.zh.md`, UI 문자열은 `web/messages/zh.json`
-  에 원문을 그대로 남겨 상류(upstream) 저장소의 변경과 대조하기 쉽게 합니다. 한국어
-  번역은 `web/messages/ko.json` 에 채웁니다.
-- UI 문자열을 새로 번역할 때는 하드코딩하지 말고 메시지 파일의 키로 추가하십시오.
-- **출력 언어 강제는 하드 캡이 아니라 프롬프트 유도입니다.** `langDirective()` 는 출력 언어를
-  설정한 언어로 **지시**할 뿐, 강제로 고정하지는 않습니다. 그래서 언어 충실도는 모델 역량·역할·
-  맥락에 따라 달라집니다. 현지화 변경을 검증할 때는 역량 있는 모델(프런티어급)을 쓰십시오.
-  저가·소형 모델은 리포트·요약이 원문(중국어)으로 되돌아갈 수 있으므로, 번역이 제대로 적용됐는지를
-  저가 모델의 출력만으로 판단하지 마십시오. OpenAI 계열 모델을 쓸 때의 `max_tokens` 설정 함정은
-  [README 의 "모델 선택과 출력 언어" 절](README.ko.md#모델-선택과-출력-언어)에 정리되어 있습니다.
-- **상류(upstream) 변경을 따라잡는 절차는 메인테이너 안내 문서에 있습니다.** 원본 ARTEX 가
-  갱신됐을 때 보존 자산과 번역 대상을 가려서 반영하고, 번역 대칭과 드리프트를 검사하는 런북은
-  [MAINTAINING.md](MAINTAINING.md)에 정리되어 있습니다.
+- **エージェントの内部推論プロンプト（行動指示の本文）は翻訳しないでください。** 原文（中国語）でベンチマークされた挙動を保つ必要があります。この本文は `agent/promptcatalog.go` と DB のシード（`agent_prompts`）にあります。翻訳すると、エージェントの判断がドリフトします。
+- **ユーザー向けの出力だけを、設定した言語に強制します。** 検出結果（`report_finding`）、事実の要約（`record_fact`）、最終レポート、チャット応答がこれに当たります。この強制は、`agent/prompt.go` の `langDirective()` というコード固定の末尾として、各ロールの system prompt の終わりに付けられます。出力言語を変えるには、この関数を修正してください。
+- **コマンド・ペイロード・コード・URL・ログの原文は翻訳しません。** 分析に必要な原文なので、そのまま残します。
+- **オリジナルの中国語は残します。** 文書は `README.zh.md` に、UI 文字列は `web/messages/zh.json` に原文をそのまま残し、上流リポジトリの変更と突き合わせやすくします。韓国語の翻訳は `web/messages/ko.json` に書きます。
+- UI 文字列を新しく翻訳するときは、ハードコードせず、メッセージファイルのキーとして追加してください。
+- **出力言語の強制は、ハードキャップではなく、プロンプトによる誘導です。** `langDirective()` は出力言語を設定した言語にするよう**指示する**だけで、言語を固定するわけではありません。そのため、言語の忠実度はモデルの能力・ロール・文脈によって変わります。ローカライズの変更を検証するときは、能力の高いモデル（フロンティアクラス）を使ってください。安価で小さいモデルでは、レポートや要約が原文（中国語）に戻ることがあります。翻訳が正しく適用されたかどうかは、安価なモデルの出力だけから判断しないでください。OpenAI 系のモデルを使うときの `max_tokens` 設定の落とし穴は、[README の「モデル選択と出力言語」](README.md#モデル選択と出力言語)にまとめてあります。
+- **上流の変更に追いつく手順は、メンテナー向けの文書にあります。** オリジナルの ARTEX が更新されたときに、残す資産と翻訳対象を切り分けて反映し、翻訳の対称性とドリフトを検査するランブックは、[MAINTAINING.md](MAINTAINING.md)にまとめてあります。
 
 ---
 
-## 개발 환경
+## 開発環境
 
-이 프로젝트는 **Go 백엔드**(단일 바이너리에 프런트엔드를 내장) + **Next.js 프런트엔드**로
-구성됩니다.
+このプロジェクトは、**Go バックエンド**（単一バイナリにフロントエンドを埋め込む）と **Next.js フロントエンド**で構成されます。
 
-주요 기능의 설계 의도는 `docs/` 의 설계 문서에 정리되어 있습니다. 취약점과 트래픽 증거를
-연결하는 기능(보고서 에이전트의 자동 바인딩, `report_finding` 의 `traffic_refs` 등)을
-다룰 때는 [취약점 다중 트래픽 증거 설계 문서](docs/finding-traffic-evidence-ko.md)를 먼저
-읽으십시오. 원문(중국어)은 같은 폴더의 `finding-traffic-evidence-zh.md` 에 보존되어 있습니다.
+主な機能の設計意図は、`docs/` の設計文書にまとめてあります。脆弱性とトラフィック証拠を結びつける機能（レポートエージェントの自動バインディング、`report_finding` の `traffic_refs` など）を扱うときは、先に[脆弱性の複数トラフィック証拠に関する設計文書](docs/finding-traffic-evidence-ja.md)を読んでください。原文（中国語）は、同じフォルダの `finding-traffic-evidence-zh.md` に保存してあります。
 
-### 요구 버전
+### 要求バージョン
 
-- Go 1.26 이상 (`go.mod` 기준)
-- Node.js 22 이상 (릴리스 워크플로 기준)
-- Docker 와 Docker Compose (로컬 실행·검증용)
+- Go 1.26 以上（`go.mod` 基準）
+- Node.js 22 以上（リリースワークフロー基準）
+- Docker と Docker Compose（ローカルでの実行と検証用）
 
-### 백엔드 (Go)
+### バックエンド (Go)
 
-로컬에 Go 가 설치되어 있다면 저장소 루트에서 다음을 실행합니다.
+ローカルに Go が入っていれば、リポジトリのルートで次を実行します。
 
 ```bash
 go build ./...
@@ -89,8 +59,7 @@ go vet ./agent/
 go test ./agent/
 ```
 
-로컬에 Go 가 없다면 Docker 로 동일하게 검증할 수 있습니다. 모듈·빌드 캐시를 named volume
-에 두면 재실행이 빨라집니다.
+ローカルに Go がなければ、Docker で同じ検証ができます。モジュールとビルドのキャッシュを named volume に置いておくと、再実行が速くなります。
 
 ```bash
 docker run --rm -v "$PWD":/src -w /src \
@@ -98,58 +67,46 @@ docker run --rm -v "$PWD":/src -w /src \
   golang:1.26 sh -c 'go build ./... && go vet ./agent/ && go test ./agent/'
 ```
 
-#### DB 통합 테스트 (postgres 필요)
+#### DB 統合テスト（PostgreSQL が必要）
 
-위의 `go test ./agent/` 는 PostgreSQL 에 붙어야 도는 **DB 통합 테스트를 조용히
-건너뜁니다.** `agent`·`config`·`db`·`evidence`·`llmrec`·`server` 여섯 패키지에는 실제
-데이터베이스가 있어야 도는 테스트가 들어 있는데, 환경 변수 `ARTEX_PG_DSN` 도 없고 설정
-파일에도 `database` 항목이 없으면 그 테스트들은 `--- SKIP` 으로 넘어가고 패키지는 `ok` 로
-끝납니다. 그래서 이 여섯 패키지를 고친 뒤 DSN 없이 검증하면 **로컬은 통과(ok)하는데 PR 의
-`go-db` 작업은 실패**할 수 있습니다.
+上の `go test ./agent/` は、PostgreSQL につながらないと動かない **DB 統合テストを静かにスキップします。** `agent`・`config`・`db`・`evidence`・`llmrec`・`server` の 6 パッケージには、実際のデータベースがないと動かないテストが入っています。環境変数 `ARTEX_PG_DSN` もなく、設定ファイルにも `database` の項目がなければ、それらのテストは `--- SKIP` で飛ばされ、パッケージは `ok` で終わります。そのため、この 6 パッケージを直したあと DSN なしで確認すると、**ローカルでは通過（ok）するのに、PR の `go-db` ジョブは失敗する**ことがあります。
 
-이 테스트들을 로컬에서 돌리려면 PostgreSQL 을 띄우고 `ARTEX_PG_DSN` 을 건넵니다. 아래는
-CI 와 같은 `postgres:16-alpine` 을 격리 네트워크에 띄워 돌리는 예시이며, 위와 같은 named
-volume 을 재사용합니다.
+これらのテストをローカルで動かすには、PostgreSQL を起動して `ARTEX_PG_DSN` を渡します。以下は、CI と同じ `postgres:16-alpine` を隔離ネットワークで起動して実行する例で、上と同じ named volume を再利用します。
 
 ```bash
-# 1) 격리 네트워크와 빈 postgres 를 띄웁니다 (CI 와 같은 이미지·계정).
+# 1) 隔離ネットワークと空の postgres を起動します（CI と同じイメージ・アカウント）。
 docker network create artexko-db 2>/dev/null || true
 docker run -d --name artexko-pg --network artexko-db \
   -e POSTGRES_USER=artex -e POSTGRES_PASSWORD=artex -e POSTGRES_DB=artex \
   postgres:16-alpine
 until docker exec artexko-pg pg_isready -U artex -d artex >/dev/null 2>&1; do sleep 1; done
 
-# 2) DSN 을 건네 DB 통합 패키지를 돌립니다 (DSN 의 host 는 컨테이너 이름입니다).
-#    고친 패키지만 돌리려면 ./agent/ 자리를 config·db·evidence·llmrec·server 로 바꿉니다.
+# 2) DSN を渡して DB 統合パッケージを実行します（DSN の host はコンテナ名です）。
+#    直したパッケージだけ実行するには、./agent/ の部分を config・db・evidence・llmrec・server に置き換えます。
 docker run --rm --network artexko-db -v "$PWD":/src -w /src \
   -v artexko-gomod:/go/pkg/mod -v artexko-gocache:/root/.cache/go-build \
   -e ARTEX_PG_DSN='postgres://artex:artex@artexko-pg:5432/artex?sslmode=disable' \
   golang:1.26 sh -c 'go test ./agent/ -count=1'
 
-# 3) 정리합니다.
+# 3) 片付けます。
 docker rm -f artexko-pg && docker network rm artexko-db
 ```
 
-CI 의 `go-db` 작업은 이 여섯 패키지를 **각각 자체 postgres 로 격리해** 머지 전에 강제로
-돌립니다(`.github/workflows/ci.yml`). DB 통합 패키지를 고쳤다면 PR 을 올리기 전에 위
-방법으로 해당 패키지를 직접 확인하기를 권합니다.
+CI の `go-db` ジョブは、この 6 パッケージを**それぞれ専用の postgres で隔離し**、マージ前に必ず実行します（`.github/workflows/ci.yml`）。DB 統合パッケージを変更した場合は、PR を出す前に、上の方法でそのパッケージを直接確認することをおすすめします。
 
-### 프런트엔드 (web)
+### フロントエンド (web)
 
 ```bash
 cd web
 npm ci
-npm run dev          # 개발 서버
-npm run build        # 프로덕션 빌드
-npm run build:static # 정적 내보내기 빌드(머지 게이트 · TypeScript 타입 검사 포함)
-npm run check        # Biome 린트·포맷 검사(정보용 · 선재 부채로 아직 머지 게이트 아님)
-npm run check:fix    # 자동 수정
+npm run dev          # 開発サーバー
+npm run build        # 本番ビルド
+npm run build:static # 静的エクスポートのビルド（マージゲート · TypeScript の型検査を含む）
+npm run check        # Biome のリント・フォーマット検査（情報用 · 既存の負債があるため、まだマージゲートではない）
+npm run check:fix    # 自動修正
 ```
 
-로컬에 Node(요구 버전 20+)가 없거나 설치된 네이티브 의존성이 플랫폼과 맞지 않으면 Docker
-로 동일하게 검증할 수 있습니다. `node_modules` 를 named volume 에 두면 호스트의 플랫폼용
-바이너리(예: `@parcel/watcher`·Biome)와 섞이지 않고 재실행도 빨라집니다. 이 저장소의 web
-검증은 CI 와 같은 이 방식으로 합니다.
+ローカルに Node（要求バージョン 20+）がないとき、またはインストール済みのネイティブ依存がプラットフォームと合わないときは、Docker で同じ検証ができます。`node_modules` を named volume に置くと、ホストのプラットフォーム向けバイナリ（例: `@parcel/watcher` や Biome）と混ざらず、再実行も速くなります。このリポジトリの web 検証は、CI と同じ方法で行います。
 
 ```bash
 docker run --rm -v "$PWD":/src -w /src/web \
@@ -157,140 +114,74 @@ docker run --rm -v "$PWD":/src -w /src/web \
   node:22 bash -c 'npm ci && npm run build:static'
 ```
 
-커밋 전 포맷·린트는 Biome 으로 관리합니다. `lint-staged` 가 스테이징된 파일에 대해
-`biome check --write` 를 자동으로 돌립니다.
+コミット前のフォーマットとリントは Biome で管理します。`lint-staged` が、ステージされたファイルに対して `biome check --write` を自動で実行します。
 
-### 전체 실행 (Docker Compose)
-
-```bash
-cp .env.example .env     # POSTGRES_PASSWORD 설정
-docker compose up -d     # artex + postgres 기동 → http://localhost:8787
-```
-
----
-
-## 기여 절차
-
-1. 먼저 **이슈를 엽니다.** 큰 변경은 작업을 시작하기 전에 이슈로 방향을 맞추는 편이
-   좋습니다. 작은 수정(오타·링크·명백한 버그)은 바로 PR 을 보내도 됩니다.
-2. 저장소를 **포크**하고 주제 브랜치를 만듭니다. 브랜치 이름은 `feat/...`, `fix/...`,
-   `docs/...`, `i18n/...` 처럼 변경 성격을 앞에 둡니다.
-3. 변경을 작성하고 **해당 범위의 검증을 직접 돌립니다.** Go 변경이면 위의
-   `build`·`vet`·`test` 를 통과시킵니다. web 변경이면 `npm run build:static`
-   (머지 게이트 · TypeScript 타입 검사를 함께 수행합니다)을 통과시킵니다.
-   `npm run check`(Biome)는 상류에서 딸려온 선재 린트 부채가 남아 있어 아직 머지
-   게이트가 아니고 `web.yml` 에서 정보용 단계로만 돌리므로, 전체를 통과시킬 필요는
-   없습니다. 대신 **내 변경이 새 오류를 더하지 않았는지**만 확인하면 됩니다(커밋할 때
-   `lint-staged` 가 스테이징한 파일에만 `biome check --write` 를 자동으로 적용합니다).
-   문서(`.md`)를 바꿨다면 `python3 -I scripts/check-doc-links.py` 로 저장소 안
-   링크·이미지 참조와 문서 앵커(`#헤딩`) 링크가 깨지지 않았는지 확인합니다. 앵커는
-   GitHub 과 같은 규칙으로 헤딩에서 slug 를 만들어 대조하므로, 헤딩 글자를 바꾸면서
-   그 헤딩을 가리키던 앵커 링크를 함께 고치지 않으면 여기서 걸립니다(CI 의 `docs`
-   워크플로가 같은 검사를 머지 게이트로 강제합니다). 이 검사는 저장소 루트의
-   [`.pre-commit-config.yaml`](.pre-commit-config.yaml)에 `docs` 훅으로도 들어 있어,
-   `pre-commit install` 을 해 두면 커밋할 때 자동으로 돌아갑니다(파이썬 표준 라이브러리만
-   쓰고 네트워크에 접속하지 않아 Docker 없이 끝납니다).
-4. **PR 을 엽니다.** 제목·설명은 [PR 템플릿](.github/PULL_REQUEST_TEMPLATE.md)을 따르고,
-   무엇을 왜 바꿨는지와 어떻게 검증했는지를 적습니다. UI 를 바꿨다면 스크린샷을 첨부합니다.
-5. 사용자에게 보이는 변경(기능·현지화·문서·탐지 규칙 등)이라면 [변경 이력(CHANGELOG.md)](CHANGELOG.md)
-   의 `[Unreleased]` 절에 한 줄을 더합니다. 내부 리팩터링이나 테스트 전용 변경은 생략해도 됩니다.
-
-### 커밋 메시지
-
-기존 커밋 이력의 관례를 따릅니다. 형식은 `type(scope): 설명` 이며, 설명은 한국어로 씁니다.
-
-- `type`: `feat` · `fix` · `docs` · `chore` · `refactor` · `test` · `i18n` 등
-- `scope`: 바뀐 영역(`agent` · `web` · `server` 등), 생략 가능
-
-예시입니다.
-
-```
-feat(agent): 사용자 노출 출력을 한국어로 강제 (langDirective)
-docs: 한국어 README 작성, 원본은 README.zh.md 로 보존
-i18n(web): 대시보드 네비게이션 라벨 한국어 번역
-```
-
----
-
-## 탐지 규칙·탐지 테스트 기여
-
-이 저장소는 ARTEX 같은 자율 AI 공격을 **방어·탐지**하기 위한 규칙을 [`detections/`](detections/)에 함께
-둡니다. 배포 가능한 [Sigma](https://sigmahq.io) 규칙([`detections/sigma/`](detections/sigma/)), 네트워크용
-[Suricata](https://suricata.io) 규칙([`detections/suricata/`](detections/suricata/)),
-[MITRE ATT&CK](https://attack.mitre.org/) 커버리지 레이어([`detections/attack/`](detections/attack/)), 그리고
-이 규칙들이 실제로 발화하는지 재현 가능하게 증명하는 테스트([`detections/tests/`](detections/tests/))로
-이루어져 있습니다. 탐지 규칙을 새로 보내거나 고칠 때는 아래 계약을 지켜 주십시오. 여덟 테스트 스위트가 이
-계약의 상당 부분을 기계적으로 강제하므로, 규칙만 바꾸고 테스트·레이어를 갱신하지 않으면 테스트가 실패합니다.
-
-- **모든 지표를 관측 가능한 사실에 접지합니다.** 규칙이 쓰는 문자열·User-Agent·행동 임계값은 이 저장소
-  소스에서 실제로 확인되는 것이어야 하고, 추정으로 만들지 않습니다. 근거가 되는 소스 파일을 규칙 안에
-  밝혀 주십시오(예: `artex-enrich/1.0` 지표는 `enrich/enrich.go` 에서 확인됩니다). 지표 일치 테스트
-  ([`detections/tests/indicators/`](detections/tests/indicators/))가 각 지표가 상류 소스와 규칙 양쪽에
-  여전히 있는지 검사하므로, 상류 재동기화로 소스 문자열이 바뀌면 규칙을 함께 고치지 않는 한 테스트가 실패합니다.
-  기계 판독 지표 목록([`detections/indicators/artex_indicators.csv`](detections/indicators/artex_indicators.csv))을
-  바꾸면, 그 지표를 그대로 담은 MISP 이벤트([`detections/indicators/artex_indicators.misp.json`](detections/indicators/artex_indicators.misp.json))도
-  함께 갱신합니다. MISP 내보내기 테스트([`detections/tests/misp/`](detections/tests/misp/))가 두 파일이 행
-  단위로 일치하는지, 그리고 그 이벤트가 pymisp 로 적재되는 유효한 MISP 문서인지 강제합니다.
-- **한계를 정직하게 적습니다.** Sigma 규칙은 `description` 에, Suricata 규칙은 주석에 그 규칙이 못 잡는
-  경우와 오탐 가능성을 적습니다. ARTEX 고유 시그니처가 아니라 일반 헌팅 리드(예: 파괴 명령)라면 그렇게
-  명시해, 한 번의 적중만으로 공격자를 ARTEX 로 단정하지 않게 합니다.
-- **정적 검증을 통과시킵니다.** Sigma 규칙은 SigmaHQ 검증기 기준을 이슈 0 으로 통과해야 합니다
-  (`sigma check --validation-config detections/tests/sigma_lint/validators.yml`). 기본 `sigma check` 는
-  pySigma 핵심 검증기만 돌리므로, 제목 표기·필드/로그소스 분류·참조 링크 같은 SigmaHQ 관례는 이 기준으로만
-  걸러집니다. 네 가지 예외는 단독 규칙 세트에 맞지 않는 SigmaHQ 모노레포 관례이고, 그 사유를
-  [`detections/tests/sigma_lint/validators.yml`](detections/tests/sigma_lint/validators.yml) 에 적어 두었습니다.
-  Suricata 규칙은 `suricata -T` 로 깨끗이 로드되어야 합니다.
-- **재현 가능한 테스트를 함께 보냅니다.** 규칙이 발화하는지(또는 구조가 유효한지)를
-  [`detections/tests/`](detections/tests/) 아래 테스트로 증명합니다. 입력은 바이너리를 저장소에 넣지 말고
-  매번 결정론적으로 생성하고, 엔진 버전에 무관한 속성(발화 존재·오탐 없음)은 정확히 단언하며, 버전에 따라
-  흔들리는 수치는 하한으로 단언하고 기준값을 따로 기록합니다. Sigma 상관 규칙을 더하거나 고치면 백엔드
-  이식성 테스트([`detections/tests/sigma_backends/`](detections/tests/sigma_backends/))가 그 규칙이 여러
-  백엔드에서 변환되는지 확인하므로, [`detections/README.md`](detections/README.md) 의 백엔드 지원 설명과
-  어긋나지 않게 유지해 주십시오.
-- **ATT&CK 레이어를 함께 갱신합니다.** 규칙에 `attack.*` 태그를 더하거나 바꾸면
-  [`detections/attack/artex_navigator_layer.json`](detections/attack/artex_navigator_layer.json) 의 기법·점수도
-  맞춰 갱신합니다. 정합 테스트가 규칙↔레이어 양방향 일치를 강제하므로, 레이어에 없는 규칙 태그나 규칙에
-  없는 레이어 기법이 있으면 실패합니다.
-- **공격 안내로 읽히는 내용을 넣지 않습니다.** 이 저장소의 탐지 자료는 방어·탐지 포지셔닝만 유지합니다.
-  익스플로잇 수행 방법이나 탐지 우회 기법처럼 공격을 돕는 서술은 받지 않습니다.
-
-여덟 테스트 스위트는 Docker 만 있으면 그대로 돌릴 수 있고, 생성물을 저장소에 커밋하지 않습니다. 각 스크립트는
-단언이 하나라도 실패하면 0 이 아닌 코드로 끝나므로 CI 나 pre-commit 훅에 바로 넣을 수 있습니다.
+### 全体の起動（Docker Compose）
 
 ```bash
-detections/tests/sigma/run.sh           # Sigma: sigma check + 백엔드 변환 + 지표 보존
-detections/tests/sigma_match/run.sh     # Sigma: 원자 규칙이 악성 샘플에 발화·정상 샘플에 침묵
-detections/tests/sigma_lint/run.sh      # Sigma: SigmaHQ 관례 전체 검증기 + 문서화된 기준
-detections/tests/sigma_backends/run.sh  # Sigma 이식성: 상관 규칙이 여러 백엔드에서 변환되는지
-detections/tests/suricata/run.sh        # Suricata: pcap 합성 → suricata -r → 경보 수 단언
-detections/tests/attack/run.sh          # ATT&CK: 레이어 ↔ 규칙 양방향 정합
-detections/tests/indicators/run.sh      # 지표: 규칙의 고정 지표 ↔ 상류 소스 양방향 일치
-detections/tests/misp/run.sh            # MISP: 지표 CSV ↔ MISP 이벤트 동기화 + pymisp 유효성
+cp .env.example .env     # POSTGRES_PASSWORD を設定
+docker compose up -d     # artex + postgres を起動 → http://localhost:8787
 ```
-
-여덟을 한 번에 돌리려면 [`detections/tests/run-all.sh`](detections/tests/run-all.sh)를 쓰십시오. CI 와 같은
-순서로 여덟을 순차 실행하고, 앞선 스위트가 실패해도 나머지를 끝까지 돌린 뒤 스위트별 PASS/FAIL 요약을
-출력하며, 하나라도 실패하면 0 이 아닌 코드로 끝납니다. 이 러너를 pre-commit 훅으로 바로 거는 설정 예시가
-저장소 루트의 [`.pre-commit-config.yaml`](.pre-commit-config.yaml)에 있습니다. `pip install pre-commit &&
-pre-commit install` 로 설치하면, 탐지 규칙이나 그 규칙이 고정한 상류 소스가 바뀌는 커밋에서만(CI 와 같은
-범위) 러너가 돌아 규칙·테스트 불일치를 푸시 전에 잡습니다. 같은 설정 파일에는 문서 내부 링크·이미지·앵커를
-검사하는 `docs` 훅(위 기여 절차 3번의 `check-doc-links.py`)도 함께 들어 있습니다.
-
-이 여덟 테스트는 저장소 CI([`.github/workflows/detections.yml`](.github/workflows/detections.yml))가
-`detections/` 아래가 바뀐 푸시·PR 마다 돌립니다. 지표 일치 테스트는 그 지표가 가리키는 상류 소스 파일
-(`enrich/`·`selfupdate/`·`guard/`·`db/`·`cmd/artex/main.go`)이 바뀔 때도 돌아, 상류 재동기화가 User-Agent·
-마커·기본 포트를 바꿔 규칙이 조용히 낡는 경우를 함께 잡습니다. 따라서 규칙만 바꾸고 테스트·레이어를 갱신하지 않은 변경, SigmaHQ 관례를
-깨뜨린 규칙, 또는 소스와 어긋난 규칙은 머지 전에 CI 에서 빨갛게 드러납니다.
-
-규칙 색인과 각 규칙의 근거·한계는 [`detections/README.md`](detections/README.md)에, 테스트의 단언 항목과
-실행법은 [`detections/tests/README.md`](detections/tests/README.md)에 정리되어 있습니다.
 
 ---
 
-## 라이선스
+## 貢献の手順
 
-이 프로젝트는 **GNU Affero General Public License v3.0(AGPL-3.0)** 으로 배포됩니다.
-기여물을 제출하면, 그 기여물도 **AGPL-3.0 으로 공개된다는 데 동의**하는 것으로 봅니다.
-특히 이 프로젝트를 수정해 네트워크를 통해(예: 온라인 서비스로) 사용자에게 제공한다면,
-그 사용자에게 대응하는 완전한 소스 코드를 공개해야 합니다. 전체 조항은 [LICENSE](LICENSE)
-파일에 있습니다.
+1. まず **Issue を開きます。** 大きな変更は、作業を始める前に Issue で方向を合わせておくのがよいです。小さな修正（誤字・リンク・明らかなバグ）は、すぐに PR を送ってもかまいません。
+2. リポジトリを **フォーク** し、トピックブランチを作ります。ブランチ名は `feat/...`、`fix/...`、`docs/...`、`i18n/...` のように、変更の性質を先頭に置きます。
+3. 変更を書き、**その範囲の検証を自分で実行します。** Go の変更であれば、上の `build`・`vet`・`test` を通します。web の変更であれば、`npm run build:static`（マージゲートであり、TypeScript の型検査も同時に行います）を通します。`npm run check`（Biome）は、上流から持ち込まれた既存のリント負債が残っているため、まだマージゲートではなく、`web.yml` では情報用の段階としてだけ実行されます。そのため、全体を通す必要はありません。代わりに、**自分の変更が新しいエラーを増やしていないか**だけを確認すれば十分です（コミットするとき、`lint-staged` がステージしたファイルだけに `biome check --write` を自動で適用します）。文書（`.md`）を変えた場合は、`python3 -I scripts/check-doc-links.py` で、リポジトリ内のリンク・画像の参照と、文書アンカー（`#見出し`）のリンクが壊れていないかを確認します。アンカーは GitHub と同じ規則で見出しから slug を作って照合するため、見出しの文字を変えても、その見出しを指していたアンカーリンクを一緒に直さないと、ここで失敗します（CI の `docs` ワークフローが、同じ検査をマージゲートとして強制します）。この検査は、リポジトリルートの [`.pre-commit-config.yaml`](.pre-commit-config.yaml) に `docs` フックとしても入っているので、`pre-commit install` をしておけば、コミット時に自動で実行されます（Python の標準ライブラリだけを使い、ネットワークにも接続しないため、Docker なしで終わります）。
+4. **PR を開きます。** タイトルと説明は [PR テンプレート](.github/PULL_REQUEST_TEMPLATE.md) に従い、何をなぜ変えたか、どのように検証したかを書きます。UI を変えた場合は、スクリーンショットを添付します。
+5. ユーザーに見える変更（機能・ローカライズ・文書・検知ルールなど）であれば、[変更履歴 (CHANGELOG.md)](CHANGELOG.md) の `[Unreleased]` の節に 1 行足します。内部のリファクタリングや、テストだけの変更は省いてもかまいません。
+
+### コミットメッセージ
+
+これまでのコミット履歴の慣例に従います。形式は `type(scope): 説明` で、説明は日本語で書きます。
+
+- `type`: `feat` · `fix` · `docs` · `chore` · `refactor` · `test` · `i18n` など
+- `scope`: 変わった領域（`agent` · `web` · `server` など）。省略できます
+
+例です。
+
+```
+feat(agent): ユーザー向け出力を韓国語に強制 (langDirective)
+docs: 韓国語 README を作成し、原文は README.zh.md として保存
+i18n(web): ダッシュボードのナビゲーションラベルを韓国語に翻訳
+```
+
+---
+
+## 検知ルール・検知テストへの貢献
+
+このリポジトリは、ARTEX のような自律型 AI 攻撃を**防御・検知**するためのルールを [`detections/`](detections/) に一緒に置いています。デプロイできる [Sigma](https://sigmahq.io) ルール（[`detections/sigma/`](detections/sigma/)）、ネットワーク向けの [Suricata](https://suricata.io) ルール（[`detections/suricata/`](detections/suricata/)）、[MITRE ATT&CK](https://attack.mitre.org/) のカバレッジレイヤー（[`detections/attack/`](detections/attack/)）、そしてこれらのルールが実際に発火することを再現可能な形で証明するテスト（[`detections/tests/`](detections/tests/)）で構成されます。検知ルールを新しく送るとき、または直すときは、以下の契約を守ってください。8 つのテストスイートがこの契約のかなりの部分を機械的に強制するため、ルールだけを変えてテストやレイヤーを更新しないと、テストは失敗します。
+
+- **すべての指標を、観測できる事実に基づくようにします。** ルールが使う文字列・User-Agent・行動の閾値は、このリポジトリのソースで実際に確認できるものでなければならず、推測で作ってはいけません。根拠となるソースファイルをルールの中に示してください（例: `artex-enrich/1.0` の指標は `enrich/enrich.go` で確認できます）。指標一致テスト（[`detections/tests/indicators/`](detections/tests/indicators/)）が、各指標が上流のソースとルールの両方にまだあるかを検査します。そのため、上流の再同期でソースの文字列が変わると、ルールを一緒に直さない限りテストは失敗します。機械可読の指標一覧（[`detections/indicators/artex_indicators.csv`](detections/indicators/artex_indicators.csv)）を変えたら、その指標をそのまま載せた MISP イベント（[`detections/indicators/artex_indicators.misp.json`](detections/indicators/artex_indicators.misp.json)）も一緒に更新します。MISP のエクスポートテスト（[`detections/tests/misp/`](detections/tests/misp/)）が、2 つのファイルが行単位で一致すること、そしてそのイベントが pymisp で読み込める妥当な MISP 文書であることを強制します。
+- **限界を正直に書きます。** Sigma ルールは `description` に、Suricata ルールはコメントに、そのルールが捉えられない場合と誤検知の可能性を書きます。ARTEX 固有のシグネチャではなく、一般的なハンティングの手掛かり（例: 破壊コマンド）であればそのように明示し、1 回の一致だけで攻撃者を ARTEX だと断定しないようにします。
+- **静的検証を通します。** Sigma ルールは、SigmaHQ の検証基準を指摘 0 件で通過しなければなりません（`sigma check --validation-config detections/tests/sigma_lint/validators.yml`）。既定の `sigma check` は pySigma の中核検証器だけを実行するため、タイトルの表記、フィールドやログソースの分類、参照リンクといった SigmaHQ の慣例は、この基準でしかふるい落とされません。4 つの例外は、単独のルールセットには合わない SigmaHQ モノレポの慣例であり、その理由は [`detections/tests/sigma_lint/validators.yml`](detections/tests/sigma_lint/validators.yml) に書いてあります。Suricata ルールは `suricata -T` で問題なくロードされなければなりません。
+- **再現可能なテストを一緒に送ります。** ルールが発火するか（または構造が妥当か）を、[`detections/tests/`](detections/tests/) 以下のテストで証明します。入力はバイナリをリポジトリに入れず、毎回決定的に生成します。エンジンのバージョンに依存しない性質（発火すること、誤検知がないこと）は正確にアサートし、バージョンによって揺れる数値は下限でアサートし、基準値は別に記録します。Sigma の相関ルールを追加または修正すると、バックエンド移植性テスト（[`detections/tests/sigma_backends/`](detections/tests/sigma_backends/)）が、そのルールが複数のバックエンドで変換されるかを確認します。[`detections/README.md`](detections/README.md) のバックエンド対応の説明と食い違わないように保ってください。
+- **ATT&CK レイヤーを一緒に更新します。** ルールに `attack.*` タグを追加または変更したら、[`detections/attack/artex_navigator_layer.json`](detections/attack/artex_navigator_layer.json) のテクニックとスコアも合わせて更新します。整合テストがルール↔レイヤーの双方向一致を強制するため、レイヤーにないルールのタグや、ルールにないレイヤーのテクニックがあると失敗します。
+- **攻撃の案内として読める内容は入れません。** このリポジトリの検知資料は、防御・検知の姿勢だけを保ちます。エクスプロイトの実行方法や検知回避の手法のように、攻撃を助ける記述は受け付けません。
+
+8 つのテストスイートは Docker さえあればそのまま実行でき、生成物をリポジトリにコミットしません。各スクリプトは、アサートが 1 つでも失敗すると 0 以外のコードで終わるため、CI や pre-commit フックにそのまま入れられます。
+
+```bash
+detections/tests/sigma/run.sh           # Sigma: sigma check + バックエンド変換 + 指標の保持
+detections/tests/sigma_match/run.sh     # Sigma: アトミックルールが悪意のあるサンプルで発火し、正常サンプルでは沈黙する
+detections/tests/sigma_lint/run.sh      # Sigma: SigmaHQ 慣例の全検証器 + 文書化された基準
+detections/tests/sigma_backends/run.sh  # Sigma の移植性: 相関ルールが複数のバックエンドで変換されるか
+detections/tests/suricata/run.sh        # Suricata: pcap を合成 → suricata -r → アラート数をアサート
+detections/tests/attack/run.sh          # ATT&CK: レイヤー ↔ ルールの双方向の整合
+detections/tests/indicators/run.sh      # 指標: ルールが固定した指標 ↔ 上流ソースの双方向一致
+detections/tests/misp/run.sh            # MISP: 指標 CSV ↔ MISP イベントの同期 + pymisp の妥当性
+```
+
+8 つを一度に実行するには、[`detections/tests/run-all.sh`](detections/tests/run-all.sh) を使ってください。CI と同じ順序で 8 つを順に実行し、前のスイートが失敗しても残りを最後まで走らせたあと、スイートごとの PASS/FAIL の要約を出力します。1 つでも失敗すれば 0 以外のコードで終わります。このランナーを pre-commit フックとしてそのまま掛ける設定例が、リポジトリルートの [`.pre-commit-config.yaml`](.pre-commit-config.yaml) にあります。`pip install pre-commit && pre-commit install` で導入すると、検知ルール、またはそのルールが固定した上流ソースが変わるコミットのときだけ（CI と同じ範囲で）ランナーが動き、ルールとテストの不一致をプッシュ前に捉えます。同じ設定ファイルには、文書内部のリンク・画像・アンカーを検査する `docs` フック（上の貢献手順 3 の `check-doc-links.py`）も一緒に入っています。
+
+この 8 つのテストは、リポジトリの CI（[`.github/workflows/detections.yml`](.github/workflows/detections.yml)）が、`detections/` 以下が変わったプッシュと PR のたびに実行します。指標一致テストは、その指標が指す上流のソースファイル（`enrich/`・`selfupdate/`・`guard/`・`db/`・`cmd/artex/main.go`）が変わるときにも動き、上流の再同期が User-Agent・マーカー・既定のポートを変えてルールが静かに古くなる場合も一緒に捉えます。したがって、ルールだけを変えてテストやレイヤーを更新していない変更、SigmaHQ の慣例を破ったルール、またはソースと食い違うルールは、マージ前の CI で赤く表示されます。
+
+ルールの索引と各ルールの根拠・限界は [`detections/README.md`](detections/README.md) に、テストのアサート項目と実行方法は [`detections/tests/README.md`](detections/tests/README.md) にまとめてあります。
+
+---
+
+## ライセンス
+
+このプロジェクトは **GNU Affero General Public License v3.0（AGPL-3.0）** で配布されます。貢献を提出すると、その貢献も **AGPL-3.0 で公開されることに同意した**ものとみなされます。特に、このプロジェクトを改変してネットワーク経由で（例: オンラインサービスとして）ユーザーに提供する場合は、そのユーザーに、対応する完全なソースコードを公開しなければなりません。条項の全文は [LICENSE](LICENSE) ファイルにあります。
